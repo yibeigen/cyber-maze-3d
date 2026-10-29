@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <!-- 纯净科技白昼渐变 -->
+    <linearGradient id="whiteFavBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+
+    <!-- 活墙立面明度渐变 -->
+    <linearGradient id="wallTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+
+    <radialGradient id="whiteCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="45%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </radialGradient>
+  </defs>
+
+  <!-- 纯白科技圆角底座：带全息蔚蓝柔和描边与阴影感 -->
+  <rect width="64" height="64" rx="16" fill="url(#whiteFavBg)" stroke="#0284c7" stroke-width="1.6" stroke-opacity="0.35" />
+
+  <!-- 等轴测 3D 动力学活墙六边形回路 (白昼钛合金属立体面) -->
+  <path d="M32 9 L53 21 L53 43 L32 55 L11 43 L11 21 Z" fill="url(#wallTop)" stroke="#64748b" stroke-width="2.2" stroke-linejoin="round" />
+
+  <!-- 3D 墙体内部分割折线 (机械立面阴影) -->
+  <path d="M11 21 L32 33 L32 55 L11 43 Z" fill="#94a3b8" />
+  <path d="M32 33 L53 21 L53 43 L32 55 Z" fill="#64748b" />
+  <path d="M11 21 L32 33 L53 21" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 迷宫发光能量光轨 (高饱和电光蓝在白底上极度鲜亮) -->
+  <path d="M18 25 L32 33 L46 25" stroke="#0284c7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 中心全息聚变能量核 (白昼通透蔚蓝晶体) -->
+  <circle cx="32" cy="33" r="7.5" fill="url(#whiteCore)" />
+  <circle cx="32" cy="33" r="3" fill="#ffffff" />
+
+  <!-- 终点信标小粉晶点 -->
+  <circle cx="49" cy="23" r="2.6" fill="#d946ef" />
+</svg>

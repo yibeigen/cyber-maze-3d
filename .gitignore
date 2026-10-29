@@ -1,0 +1,13 @@
+node_modules/
+dist/
+tsconfig.tsbuildinfo
+
+.env
+.env.*
+*.local
+
+.workbuddy/
+.qoder/
+
+.DS_Store
+Thumbs.db

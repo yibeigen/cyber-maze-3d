@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * 主题色板系统（全案 3.1）
+ * 2D UI 的底色 / 边框 / 文字全部走 CSS 变量，确保切换主题时 UI 完全联动。
+ * 每个主题四类角色：canvas（3D 场景，见 themes.ts）/ accent（唯一彩色焦点）
+ * / signal（warn + ok，仅语义用途）/ ink（三级文字）。
+ */
+:root,
+[data-theme='cyber'] {
+  color-scheme: dark;
+
+  --surface: 15 17 26;      /* 面板底色 */
+  --glass: 15 17 26;        /* 玻璃面板底色（比 surface 更暗，配合 blur 透出场景） */
+  --edge: 100 116 139;      /* 描边（提亮，确保暗色下贴片轮廓清晰） */
+  --sunken: 15 23 42;       /* 凹槽底色 */
+  --ink: 241 245 249;       /* 主文字 */
+  --ink-dim: 148 163 184;   /* 次要文字 */
+  --ink-faint: 100 116 139; /* 弱化文字 */
+  --accent: 56 189 248;     /* 亮天蓝 #38bdf8 */
+  --accent-ink: 2 6 23;     /* 亮蓝底上的文字（深色） */
+  --glow: 56 189 248;       /* 氛围光色，默认与 accent 同值 */
+  --warn: 245 158 11;       /* 警告色 */
+  --ok: 52 211 153;         /* 通路/成功色（倒计时环"开路"态） */
+}
+
+/* 极光紫电主题：面板微紫底，UI 主色转为亮紫 #c084fc，按钮与选中态完全联动 */
+[data-theme='aurora'] {
+  color-scheme: dark;
+
+  --surface: 21 18 38;
+  --glass: 21 18 38;
+  --edge: 116 100 160;
+  --sunken: 24 20 48;
+  --ink: 241 245 249;
+  --ink-dim: 148 163 184;
+  --ink-faint: 100 116 139;
+  --accent: 192 132 252;     /* 亮紫 #c084fc */
+  --accent-ink: 20 10 34;    /* 浅紫底上用深紫字：白字在 #c084fc 上只有 2.5:1，不达标 */
+  --glow: 192 132 252;
+  --warn: 245 158 11;
+  --ok: 52 211 153;
+}
+
+/* 全息明境（浅色主题）：文字对比度严格满足 WCAG 4.5:1 */
+[data-theme='light'] {
+  color-scheme: light;
+
+  --surface: 255 255 255;
+  --glass: 255 255 255;
+  --edge: 203 213 225;
+  --sunken: 241 245 249;
+  --ink: 15 23 42;
+  --ink-dim: 71 85 105;
+  --ink-faint: 148 163 184;
+  --accent: 2 132 199;       /* 深天蓝 #0284c7 */
+  --accent-ink: 255 255 255;
+  --glow: 2 132 199;
+  --warn: 180 83 9;          /* 深琥珀，白底上对比度可读 */
+  --ok: 4 120 87;            /* 深翡翠 #047857，白底上 ≥ 4.5:1 */
+}
+
+/* 细滚动条 */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgb(var(--ink-faint) / 0.45);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/*
+ * 全站唯一面板材质（全案 3.2）
+ * 玻璃感来自上缘 1px 内高光 + 一层落影，不靠外发光堆砌。
+ */
+.glass-panel {
+  background: rgb(var(--glass) / 0.72);
+  backdrop-filter: blur(20px) saturate(115%);
+  -webkit-backdrop-filter: blur(20px) saturate(115%);
+  border: 1px solid rgb(var(--edge) / 0.5);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+    0 20px 50px -20px rgb(0 0 0 / 0.5);
+}
+
+[data-theme='light'] .glass-panel {
+  background: rgb(var(--glass) / 0.82);
+  border-color: rgb(var(--edge) / 0.9);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.85),
+    0 16px 40px -24px rgb(15 23 42 / 0.28);
+}
+
+/* 面板内凹槽：数据格、开关行、输入框统一用它，保证层次只有两级 */
+.glass-inset {
+  background: rgb(var(--sunken) / 0.55);
+  border: 1px solid rgb(var(--edge) / 0.32);
+}
+
+[data-theme='light'] .glass-inset {
+  background: rgb(var(--sunken) / 0.9);
+  border-color: rgb(var(--edge) / 0.7);
+}
+
+/*
+ * 氛围遮罩（全案 3.2）：弹层与标题页背景，替代死黑压暗。
+ * 右上角一抹主题光晕，让 3D 迷宫透出来。
+ */
+.aurora-mask {
+  background:
+    radial-gradient(60% 50% at 85% 0%, rgb(var(--glow) / 0.14), transparent 70%),
+    linear-gradient(180deg, rgb(2 6 23 / 0.88), rgb(2 6 23 / 0.78));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme='light'] .aurora-mask {
+  background:
+    radial-gradient(60% 50% at 85% 0%, rgb(var(--glow) / 0.1), transparent 70%),
+    linear-gradient(180deg, rgb(226 232 240 / 0.84), rgb(241 245 249 / 0.74));
+}
+
+/*
+ * 标题页专用薄纱：不加 backdrop blur。
+ * 全屏 20px 模糊会把 3D 迷宫糊成一团，标题页要的是"透出来的活体结构"。
+ * 左侧压暗保证文字对比度，右下留出控制台的安全区。
+ */
+.aurora-veil {
+  background:
+    linear-gradient(90deg, rgb(2 6 23 / 0.82) 0%, rgb(2 6 23 / 0.45) 38%, rgb(2 6 23 / 0) 62%),
+    linear-gradient(180deg, rgb(2 6 23 / 0.62) 0%, rgb(2 6 23 / 0.12) 40%, rgb(2 6 23 / 0.55) 100%),
+    radial-gradient(55% 45% at 78% 22%, rgb(var(--glow) / 0.16), transparent 72%);
+}
+
+[data-theme='light'] .aurora-veil {
+  background:
+    linear-gradient(90deg, rgb(226 232 240 / 0.9) 0%, rgb(226 232 240 / 0.5) 40%, rgb(241 245 249 / 0) 65%),
+    linear-gradient(180deg, rgb(241 245 249 / 0.7) 0%, rgb(241 245 249 / 0.1) 42%, rgb(226 232 240 / 0.6) 100%),
+    radial-gradient(55% 45% at 78% 22%, rgb(var(--glow) / 0.12), transparent 72%);
+}
+
+/* 主按钮光晕呼吸：全屏唯一循环 UI 动效（全案 3.5） */
+@keyframes glow-breathe {
+  0%,
+  100% {
+    box-shadow: 0 10px 30px -14px rgb(var(--glow) / 0.4);
+  }
+  50% {
+    box-shadow: 0 16px 42px -10px rgb(var(--glow) / 0.65);
+  }
+}
+
+.anim-glow {
+  animation: glow-breathe 2400ms cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* 预警色条：与场景内 4Hz 琥珀 / 8Hz 翡翠脉冲同频（全案 5.7） */
+@keyframes pulse-bar {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pulse-warn {
+  animation: pulse-bar 250ms linear infinite alternate;
+}
+
+.pulse-ok {
+  animation: pulse-bar 125ms linear infinite alternate;
+}
+
+[data-reduced-motion='true'] .anim-glow,
+[data-reduced-motion='true'] .pulse-warn,
+[data-reduced-motion='true'] .pulse-ok {
+  animation: none;
+}
+
+[data-reduced-motion='true'] * {
+  scroll-behavior: auto !important;
+}

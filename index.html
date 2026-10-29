@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>CyberMaze 3D 活墙 · 3D 赛博迷宫在线玩</title>
+    <meta name="description" content="在线玩 CyberMaze 3D（活墙）：一款会重排的 3D 赛博朋克迷宫游戏。React + Three.js 构建，生成树不变量保证终点永远可达，A* 实时寻路，支持三套主题、第一/第三人称与手机触控，无需下载。" />
+    <meta name="author" content="yibeigen" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+    <link rel="canonical" href="https://yibeigen.github.io/cyber-maze-3d/" />
+    <meta name="theme-color" content="#e2e8f0" />
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CyberMaze 3D" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:title" content="CyberMaze 3D 活墙 · 会变形的 3D 赛博迷宫，永远有路" />
+    <meta property="og:description" content="一款会重排的 3D 赛博朋克迷宫游戏。生成树不变量保证终点永远可达，A* 实时寻路，三套主题、双视角、手机触控，打开即玩。" />
+    <meta property="og:url" content="https://yibeigen.github.io/cyber-maze-3d/" />
+    <meta property="og:image" content="https://yibeigen.github.io/cyber-maze-3d/og.jpg" />
+    <meta property="og:image:width" content="1376" />
+    <meta property="og:image:height" content="768" />
+    <meta property="og:image:alt" content="CyberMaze 3D 活墙 3D 赛博迷宫游戏画面" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CyberMaze 3D 活墙 · 会变形的 3D 赛博迷宫" />
+    <meta name="twitter:description" content="生成树不变量保证终点永远可达，A* 实时寻路。打开浏览器就能玩的 3D 赛博迷宫。" />
+    <meta name="twitter:image" content="https://yibeigen.github.io/cyber-maze-3d/og.jpg" />
+    <meta name="twitter:image:alt" content="CyberMaze 3D 活墙 3D 赛博迷宫游戏画面" />
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "VideoGame",
+            "@id": "https://yibeigen.github.io/cyber-maze-3d/#game",
+            "name": "CyberMaze 3D",
+            "alternateName": ["活墙", "CyberMaze 3D 活墙", "活墙迷宫"],
+            "url": "https://yibeigen.github.io/cyber-maze-3d/",
+            "description": "一款会重排的 3D 赛博朋克迷宫浏览器游戏。基于生成树不变量保证终点永远可达，A* 实时寻路，支持三套主题、第一/第三人称与手机触控。",
+            "image": "https://yibeigen.github.io/cyber-maze-3d/og.jpg",
+            "screenshot": "https://yibeigen.github.io/cyber-maze-3d/og.jpg",
+            "genre": ["Puzzle", "Maze", "Arcade"],
+            "gamePlatform": ["Web browser", "PC", "Mobile"],
+            "playMode": ["SinglePlayer"],
+            "inLanguage": "zh-CN",
+            "keywords": "CyberMaze 3D, 活墙, 3D迷宫, 赛博朋克游戏, 网页游戏, WebGL, React Three Fiber, Three.js, 程序化生成, A*寻路, 开源游戏",
+            "datePublished": "2026-10-29",
+            "author": {
+              "@type": "Person",
+              "name": "yibeigen",
+              "url": "https://github.com/yibeigen"
+            },
+            "codeRepository": "https://github.com/yibeigen/cyber-maze-3d",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "CNY",
+              "availability": "https://schema.org/InStock"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://yibeigen.github.io/cyber-maze-3d/#website",
+            "url": "https://yibeigen.github.io/cyber-maze-3d/",
+            "name": "CyberMaze 3D",
+            "inLanguage": "zh-CN",
+            "publisher": {
+              "@type": "Person",
+              "name": "yibeigen",
+              "url": "https://github.com/yibeigen"
+            }
+          }
+        ]
+      }
+    </script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body, #root {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #e2e8f0;
+        color: #0f172a;
+        font-family: 'Outfit Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      @keyframes pulseSlow {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(0.96); }
+      }
+      @keyframes scanBar {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- 首屏零阻塞静态骨架屏（React 挂载后自动替换） -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#e2e8f0;color:#0f172a;font-family:inherit;">
+        <div style="width:56px;height:56px;margin-bottom:18px;animation:pulseSlow 2s ease-in-out infinite;">
+          <img src="./favicon.svg" alt="CyberMaze 3D" style="width:100%;height:100%;border-radius:14px;box-shadow:0 8px 24px rgba(2,132,199,0.25);" />
+        </div>
+        <h1 style="font-size:15px;font-weight:700;letter-spacing:0.12em;color:#0284c7;margin:0 0 8px;">CyberMaze 3D 活墙</h1>
+        <p style="font-size:12px;color:#475569;letter-spacing:0.04em;margin:0 0 8px;">会重排的 3D 赛博朋克迷宫 · 永远有路</p>
+        <div style="font-size:12px;color:#475569;letter-spacing:0.04em;margin-bottom:20px;">正在构建迷宫拓扑…</div>
+        <div style="width:140px;height:3px;background:rgba(2,132,199,0.15);border-radius:9999px;overflow:hidden;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:50px;height:100%;background:#0284c7;border-radius:9999px;animation:scanBar 1.4s ease-in-out infinite;"></div>
+        </div>
+      </div>
+    </div>
+    <noscript>
+      <div style="position:fixed;inset:0;overflow:auto;padding:32px;background:#e2e8f0;color:#0f172a;font-family:system-ui,sans-serif;line-height:1.7;">
+        <h1>CyberMaze 3D 活墙 · 会变形的 3D 赛博迷宫</h1>
+        <p>一款会重排的 3D 赛博朋克迷宫浏览器游戏。基于生成树不变量保证终点永远可达，A* 实时寻路，支持三套视觉主题、第一/第三人称与手机触控，无需下载。</p>
+        <p><a href="https://yibeigen.github.io/cyber-maze-3d/">在线试玩</a> · <a href="https://github.com/yibeigen/cyber-maze-3d">GitHub 源码</a></p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
