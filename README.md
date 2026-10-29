@@ -11,7 +11,7 @@
     <!-- 作者 -->
     <a href="https://yibeigen.pages.dev/"><img src="https://img.shields.io/badge/Author-艺杯羹-d97706?style=flat-square" alt="Author"></a>
     <!-- 在线试玩 -->
-    <a href="https://yibeigen.github.io/cyber-maze-3d/"><img src="https://img.shields.io/badge/Play-在线试玩-38bdf8?style=flat-square&logo=googlechrome&logoColor=white" alt="Play Online"></a>
+    <a href="https://cyber-maze-3d.app.workbuddy.host/?sharecode=OFR2R7A3MK"><img src="https://img.shields.io/badge/Play-在线试玩-38bdf8?style=flat-square&logo=googlechrome&logoColor=white" alt="Play Online"></a>
     <!-- 单元测试 -->
     <img src="https://img.shields.io/badge/Tests-50%20passed-22c55e?style=flat-square" alt="Tests">
     <!-- 技术栈 -->
@@ -27,7 +27,7 @@
 
   | 🎮 在线秒玩入口 | 💻 源码开源仓库 | 💬 交流与获取更多工具 |
   | :---: | :---: | :---: |
-  | [**点击即玩 (GitHub Pages)**](https://yibeigen.github.io/cyber-maze-3d/) | [**GitHub / cyber-maze-3d**](https://github.com/yibeigen/cyber-maze-3d) | 关注公众号【**艺杯羹**】回复「**迷宫**」 |
+  | [**点击直接在线试玩 (免安装)**](https://cyber-maze-3d.app.workbuddy.host/?sharecode=OFR2R7A3MK) | [**GitHub / cyber-maze-3d**](https://github.com/yibeigen/cyber-maze-3d) | 关注公众号【**艺杯羹**】回复「**迷宫**」 |
 
 </div>
 
