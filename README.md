@@ -1,7 +1,7 @@
 <!-- CyberMaze 3D · 活墙 官方开源项目文档 -->
 <div align="center">
 
-  <img src="docs/img/logo.jpg" alt="CyberMaze 3D Logo" width="180" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.12);" />
+  <img src="public/logo.jpg" alt="CyberMaze 3D Logo" width="180" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.12);" />
 
   # CyberMaze 3D · 活墙
   ### 动态流形 3D 解谜 · 图论不变量守护 · 会呼吸变形的赛博迷宫
@@ -143,14 +143,14 @@ npm run dev
   <table align="center" style="border: none; margin: 12px auto;">
     <tr>
       <td align="center" style="border: none; padding: 0 20px;">
-        <img src="docs/img/wechat_qr.png" alt="微信公众号【艺杯羹】" width="220" style="border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 14px rgba(0,0,0,0.08);" />
+        <img src="public/wechat_qr.png" alt="微信公众号【艺杯羹】" width="220" style="border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 14px rgba(0,0,0,0.08);" />
         <br />
         <sub><b>微信公众号【艺杯羹】</b></sub>
         <br />
         <sub>扫码关注 · 回复「<b>迷宫</b>」进交流群 · 回复「<b>文章</b>」领博萃</sub>
       </td>
       <td align="center" style="border: none; padding: 0 20px;">
-        <img src="docs/img/reward_qr.png" alt="赞赏支持作者" width="220" style="border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 14px rgba(0,0,0,0.08);" />
+        <img src="public/reward_qr.png" alt="赞赏支持作者" width="220" style="border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 14px rgba(0,0,0,0.08);" />
         <br />
         <sub><b>赞赏支持 (Reward)</b></sub>
         <br />

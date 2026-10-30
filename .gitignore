@@ -9,5 +9,16 @@ tsconfig.tsbuildinfo
 .workbuddy/
 .qoder/
 
+# WorkBuddy 应用卡片配置（含本机绝对路径，不入库）
+*.genie
+
+# 本地私人开发底稿，不入库
+docs/MAZEXIS_DEV_SPEC.md
+docs/问题排查与解决记录.md
+docs/项目介绍.md
+
+# 图片上传暂存区（png 的 jpg 压缩副本）
+docs/upload/
+
 .DS_Store
 Thumbs.db

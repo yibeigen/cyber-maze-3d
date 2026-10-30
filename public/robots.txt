@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://yibeigen.github.io/mazexis/sitemap.xml
+Sitemap: https://yibeigen.github.io/cyber-maze-3d/sitemap.xml
