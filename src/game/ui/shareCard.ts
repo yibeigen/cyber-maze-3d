@@ -1,6 +1,7 @@
 import { MazeSize } from '../core/constants'
 import { Maze } from '../core/grid'
 import { THEMES, VisualTheme } from '../core/themes'
+import { Lang, tMsg } from '../i18n/messages'
 import { computeMazeBox, cssVarColor, drawMaze, mixHex } from './mazeDraw'
 
 export interface ShareCardData {
@@ -23,6 +24,7 @@ export interface ShareCardData {
   levelText?: string
   stars?: number
   theme: VisualTheme
+  lang: Lang
 }
 
 const SIZE_TEXT: Record<MazeSize, string> = {
@@ -51,6 +53,22 @@ function roundRect(
   ctx.closePath()
 }
 
+/** 英文文案普遍比中文长，超宽时逐级缩字号，避免顶出 1080 画布 */
+function fitFont(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  weight: number,
+  size: number,
+) {
+  let current = size
+  ctx.font = `${weight} ${current}px ${FONT_SANS}`
+  while (current > 16 && ctx.measureText(text).width > maxWidth) {
+    current -= 1
+    ctx.font = `${weight} ${current}px ${FONT_SANS}`
+  }
+}
+
 /**
  * 1080×1350 战报长图（全案 5.5）
  * 英雄区是迷宫 + A* 最优路径，与结算页共用 mazeDraw 同一套绘制逻辑。
@@ -71,6 +89,7 @@ export async function generateShareCard(data: ShareCardData): Promise<string> {
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('无法创建 Canvas 2D 上下文')
 
+  const lang = data.lang
   const theme = THEMES[data.theme] || THEMES.cyber
   const isLight = theme.id === 'light'
   const accent = cssVarColor(
@@ -113,25 +132,29 @@ export async function generateShareCard(data: ShareCardData): Promise<string> {
 
   ctx.font = `600 26px ${FONT_SANS}`
   ctx.fillStyle = inkFaint
-  ctx.fillText('MAZEXIS · 活墙', 94, 109)
+  ctx.fillText(tMsg(lang, 'shareCard.brand'), 94, 109)
 
   // 新纪录徽章（右上）
   if (data.isNewRecord) {
     ctx.textAlign = 'right'
     ctx.font = `600 26px ${FONT_SANS}`
     ctx.fillStyle = '#f59e0b'
-    ctx.fillText('★ 新纪录', 1006, 108)
+    ctx.fillText(tMsg(lang, 'shareCard.newRecord'), 1006, 108)
     ctx.textAlign = 'left'
   }
 
   // 3. 主标题与定位
-  ctx.font = `700 60px ${FONT_SANS}`
+  const titleText = tMsg(lang, 'shareCard.title')
+  fitFont(ctx, titleText, 936, 700, 60)
   ctx.fillStyle = ink
-  ctx.fillText('活墙：会变形的迷宫', 72, 196)
+  ctx.fillText(titleText, 72, 196)
 
-  ctx.font = `500 30px ${FONT_SANS}`
+  const subtitleText = data.levelText
+    ? `${data.levelText} · ${'★'.repeat(data.stars ?? 0)}${'☆'.repeat(3 - (data.stars ?? 0))}`
+    : tMsg(lang, 'shareCard.subtitleDefault')
+  fitFont(ctx, subtitleText, 936, 500, 30)
   ctx.fillStyle = inkDim
-  ctx.fillText(data.levelText ? `${data.levelText} · ${'★'.repeat(data.stars ?? 0)}${'☆'.repeat(3 - (data.stars ?? 0))}` : '会变形的迷宫，永远有出路。', 72, 254)
+  ctx.fillText(subtitleText, 72, 254)
 
   // 4. 英雄区：迷宫 + A* 最优路径
   const heroX = 72
@@ -180,17 +203,17 @@ export async function generateShareCard(data: ShareCardData): Promise<string> {
     ctx.textAlign = 'center'
     ctx.font = `500 26px ${FONT_SANS}`
     ctx.fillStyle = inkFaint
-    ctx.fillText('本局未留下迷宫快照', 540, heroY + heroH / 2)
+    ctx.fillText(tMsg(lang, 'shareCard.noSnapshot'), 540, heroY + heroH / 2)
     ctx.textAlign = 'left'
   }
 
   // 5. 数据带：用时 / 步数 / 评级
   const bandY = 930
   const columns = [
-    { label: '通关用时', value: data.timeStr, color: ink },
-    { label: '移动步数', value: `${data.moves} 步`, color: ink },
+    { label: tMsg(lang, 'shareCard.time'), value: data.timeStr, color: ink },
+    { label: tMsg(lang, 'shareCard.moves'), value: tMsg(lang, 'shareCard.movesValue', { n: data.moves }), color: ink },
     {
-      label: '路径效率',
+      label: tMsg(lang, 'shareCard.efficiency'),
       value: data.grade ?? '—',
       color:
         data.grade === 'S'
@@ -208,11 +231,11 @@ export async function generateShareCard(data: ShareCardData): Promise<string> {
     const cx = 72 + colW * i + colW / 2
     ctx.textAlign = 'center'
 
-    ctx.font = `500 24px ${FONT_SANS}`
+    fitFont(ctx, col.label, colW - 24, 500, 24)
     ctx.fillStyle = inkFaint
     ctx.fillText(col.label, cx, bandY)
 
-    ctx.font = `700 60px ${FONT_SANS}`
+    fitFont(ctx, col.value, colW - 24, 700, 60)
     ctx.fillStyle = col.color
     ctx.fillText(col.value, cx, bandY + 62)
 
@@ -228,22 +251,25 @@ export async function generateShareCard(data: ShareCardData): Promise<string> {
 
   // 6. 图论承诺
   ctx.textAlign = 'center'
-  ctx.font = `600 28px ${FONT_SANS}`
+  const promiseText = tMsg(lang, 'shareCard.promise')
+  fitFont(ctx, promiseText, 936, 600, 28)
   ctx.fillStyle = inkDim
-  ctx.fillText('墙怎么变，出路永远在 —— 生成树不变量保证', 540, 1064)
+  ctx.fillText(promiseText, 540, 1064)
 
   // 7. 参数行（种子最长 32 字符，超出截断，避免顶出画布）
   const seedText =
     data.seed.length > 18 ? `${data.seed.slice(0, 18)}…` : data.seed
-  ctx.font = `500 24px ${FONT_SANS}`
+  const sizeText = data.maze ? `${data.maze.w}×${data.maze.h}` : SIZE_TEXT[data.size]
+  const paramsText = tMsg(lang, 'shareCard.params', {
+    seed: seedText,
+    size: sizeText,
+    mode: tMsg(lang, data.shifting ? 'shareCard.shiftingOn' : 'shareCard.staticMode'),
+    shifts: data.shiftsDone,
+    scans: data.scansUsed,
+  })
+  fitFont(ctx, paramsText, 936, 500, 24)
   ctx.fillStyle = inkFaint
-  ctx.fillText(
-    `种子 ${seedText} · ${data.maze ? `${data.maze.w}×${data.maze.h}` : SIZE_TEXT[data.size]} · ${
-      data.shifting ? '动力学重排开启' : '静态模式'
-    } · 重构 ${data.shiftsDone} 次 · 扫描 ${data.scansUsed} 次`,
-    540,
-    1112,
-  )
+  ctx.fillText(paramsText, 540, 1112)
 
   // 8. 分隔线 + 提示
   ctx.strokeStyle = hairline
@@ -253,14 +279,16 @@ export async function generateShareCard(data: ShareCardData): Promise<string> {
   ctx.lineTo(1008, 1152)
   ctx.stroke()
 
-  ctx.font = `500 24px ${FONT_SANS}`
+  const replayText = tMsg(lang, 'shareCard.replayHint')
+  fitFont(ctx, replayText, 936, 500, 24)
   ctx.fillStyle = inkFaint
-  ctx.fillText('输入同款种子即可挑战同一张迷宫', 540, 1220)
+  ctx.fillText(replayText, 540, 1220)
 
   // 9. 页脚
-  ctx.font = `500 24px ${FONT_SANS}`
+  const footerText = tMsg(lang, 'shareCard.footer')
+  fitFont(ctx, footerText, 936, 500, 24)
   ctx.fillStyle = inkFaint
-  ctx.fillText('CYBERMAZE 3D · 活墙 · 艺杯羹作品 · 关注公众号【艺杯羹】', 540, 1290)
+  ctx.fillText(footerText, 540, 1290)
 
   return canvas.toDataURL('image/png')
 }

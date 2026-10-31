@@ -18,6 +18,7 @@ import { MazeSize, SIZE_CONFIGS } from '../core/constants'
 import { GenAlgo } from '../core/generate'
 import { randomSeed } from '../core/rng'
 import { SolveAlgo } from '../core/solve'
+import { useLang, useT } from '../i18n/store'
 import {
   createLabGenModel,
   createLabSolveModel,
@@ -30,10 +31,10 @@ import { hasLabOnboarding, setLabOnboardingCompleted } from '../state/persistenc
 import { useGameStore } from '../state/useGameStore'
 import { LabGuide } from './LabGuide'
 
-const SIZES: { key: MazeSize; label: string; desc: string }[] = [
-  { key: 's', label: '小', desc: '9×9' },
-  { key: 'm', label: '中', desc: '15×15' },
-  { key: 'l', label: '大', desc: '21×21' },
+const SIZES: { key: MazeSize; label: 'size.s' | 'size.m' | 'size.l'; desc: string }[] = [
+  { key: 's', label: 'size.s', desc: '9×9' },
+  { key: 'm', label: 'size.m', desc: '15×15' },
+  { key: 'l', label: 'size.l', desc: '21×21' },
 ]
 
 const SPEEDS = [0.5, 1, 2, 4]
@@ -53,6 +54,8 @@ function LegendSwatch({ color, label }: { color: string; label: string }) {
 }
 
 export function LabPanel() {
+  const t = useT()
+  const lang = useLang()
   const lab = useGameStore((s) => s.lab)
   const setLabGenAlgo = useGameStore((s) => s.setLabGenAlgo)
   const setLabSolveAlgo = useGameStore((s) => s.setLabSolveAlgo)
@@ -76,8 +79,8 @@ export function LabPanel() {
   }, [w, h, genAlgo, seed])
 
   const solveModel = useMemo(() => {
-    return createLabSolveModel(w, h, solveAlgo, genModel.open, genModel.start, genModel.exit)
-  }, [w, h, solveAlgo, genModel])
+    return createLabSolveModel(w, h, solveAlgo, genModel.open, genModel.start, genModel.exit, lang)
+  }, [w, h, solveAlgo, genModel, lang])
 
   const totalSteps = phase === 'generate' ? genModel.totalSteps : solveModel.totalSteps
 
@@ -127,8 +130,8 @@ export function LabPanel() {
 
   const currentNarration =
     phase === 'generate'
-      ? describeGenStep(genModel, stepIndex)
-      : describeSolveStep(solveModel, stepIndex)
+      ? describeGenStep(genModel, stepIndex, lang)
+      : describeSolveStep(solveModel, stepIndex, lang)
   const progressPct = totalSteps > 0 ? (stepIndex / totalSteps) * 100 : 0
 
   return (
@@ -140,7 +143,7 @@ export function LabPanel() {
           className="flex items-center gap-1.5 rounded-xl glass-panel px-3 py-1.5 text-xs font-semibold text-ink"
         >
           <Cpu className="w-4 h-4 text-cyber-accent" />
-          <span>{mobileOpen ? '收起控制台' : '算法实验室'}</span>
+          <span>{mobileOpen ? t('lab.fold') : t('lab.title')}</span>
         </button>
       </div>
 
@@ -163,10 +166,10 @@ export function LabPanel() {
             <Cpu className="w-5 h-5 text-cyber-accent" />
             <div>
               <h2 className="text-sm font-semibold tracking-wider text-ink">
-                算法实验室
+                {t('lab.title')}
               </h2>
               <p className="text-[11px] text-ink-dim">
-                看迷宫怎么生成、AI 怎么找路——可播放可单步
+                {t('lab.subtitle')}
               </p>
             </div>
           </div>
@@ -174,8 +177,8 @@ export function LabPanel() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setShowGuide(true)}
-              title="使用讲解"
-              aria-label="使用讲解"
+              title={t('lab.helpTitle')}
+              aria-label={t('lab.helpTitle')}
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge/40 bg-sunken/60 text-ink-dim transition-colors hover:text-ink"
             >
               <HelpCircle className="w-4 h-4" />
@@ -185,7 +188,7 @@ export function LabPanel() {
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-edge/60 bg-sunken text-xs text-ink-dim hover:text-ink hover:border-edge transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>返回</span>
+              <span>{t('lab.back')}</span>
             </button>
           </div>
         </div>
@@ -194,7 +197,7 @@ export function LabPanel() {
         <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs scrollbar-thin">
           {/* 阶段切换（分段控件规范） */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-ink-faint">实验阶段</label>
+            <label className="text-[11px] font-semibold text-ink-faint">{t('lab.phaseLabel')}</label>
             <div className="flex rounded-xl border border-edge/60 bg-sunken p-1">
               <button
                 type="button"
@@ -206,7 +209,7 @@ export function LabPanel() {
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>迷宫生成</span>
+                <span>{t('lab.phaseGenerate')}</span>
               </button>
               <button
                 type="button"
@@ -218,7 +221,7 @@ export function LabPanel() {
                 }`}
               >
                 <Cpu className="w-3.5 h-3.5" />
-                <span>寻路求解</span>
+                <span>{t('lab.phaseSolve')}</span>
               </button>
             </div>
           </div>
@@ -226,7 +229,7 @@ export function LabPanel() {
           {/* 算法选择器（分段控件规范） */}
           {phase === 'generate' ? (
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-ink-faint">生成算法</label>
+              <label className="text-[11px] font-semibold text-ink-faint">{t('lab.genAlgo')}</label>
               <div className="flex rounded-xl border border-edge/60 bg-sunken p-1">
                 <button
                   type="button"
@@ -237,7 +240,7 @@ export function LabPanel() {
                       : 'text-ink-dim hover:text-ink'
                   }`}
                 >
-                  DFS 深度优先
+                  {t('lab.genDfs')}
                 </button>
                 <button
                   type="button"
@@ -248,13 +251,13 @@ export function LabPanel() {
                       : 'text-ink-dim hover:text-ink'
                   }`}
                 >
-                  Prim 随机生成
+                  {t('lab.genPrim')}
                 </button>
               </div>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-ink-faint">求解算法</label>
+              <label className="text-[11px] font-semibold text-ink-faint">{t('lab.solveAlgo')}</label>
               <div className="flex rounded-xl border border-edge/60 bg-sunken p-1">
                 <button
                   type="button"
@@ -296,24 +299,24 @@ export function LabPanel() {
           {/* 画面图例：3D 场景地砖颜色的含义，与场景共用同一份色值 */}
           <div className="rounded-xl glass-inset p-3">
             <div className="mb-2 text-[11px] font-semibold text-ink-faint">
-              画面图例（看 3D 场景的地砖颜色）
+              {t('lab.legendTitle')}
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-ink-dim">
               {phase === 'generate' ? (
                 <>
-                  <LegendSwatch color={LAB_TILE_COLORS.active} label="正在处理的格" />
-                  <LegendSwatch color={LAB_TILE_COLORS.frontier} label="候选" />
-                  <LegendSwatch color={LAB_TILE_COLORS.visited} label="已经到过" />
-                  <LegendSwatch color={LAB_TILE_COLORS.default} label="还没去过" />
-                  <span className="text-ink-faint">墙降下去 = 通道已打通</span>
+                  <LegendSwatch color={LAB_TILE_COLORS.active} label={t('lab.legendActive')} />
+                  <LegendSwatch color={LAB_TILE_COLORS.frontier} label={t('lab.legendCandidate')} />
+                  <LegendSwatch color={LAB_TILE_COLORS.visited} label={t('lab.legendVisited')} />
+                  <LegendSwatch color={LAB_TILE_COLORS.default} label={t('lab.legendUntouched')} />
+                  <span className="text-ink-faint">{t('lab.legendWallDown')}</span>
                 </>
               ) : (
                 <>
-                  <LegendSwatch color={LAB_TILE_COLORS.path} label="最短路线" />
-                  <LegendSwatch color={LAB_TILE_COLORS.frontier} label="待处理" />
-                  <LegendSwatch color={LAB_TILE_COLORS.expanded} label="已经展开" />
-                  <LegendSwatch color={LAB_TILE_COLORS.default} label="还没探索" />
-                  <span className="text-ink-faint">金色光轨 = 找到的路</span>
+                  <LegendSwatch color={LAB_TILE_COLORS.path} label={t('lab.legendPath')} />
+                  <LegendSwatch color={LAB_TILE_COLORS.frontier} label={t('lab.legendPending')} />
+                  <LegendSwatch color={LAB_TILE_COLORS.expanded} label={t('lab.legendExpanded')} />
+                  <LegendSwatch color={LAB_TILE_COLORS.default} label={t('lab.legendUnexplored')} />
+                  <span className="text-ink-faint">{t('lab.legendGolden')}</span>
                 </>
               )}
             </div>
@@ -322,7 +325,7 @@ export function LabPanel() {
           {/* 尺寸与种子 */}
           <div className="space-y-2 pt-1 border-t border-edge/60">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-semibold text-ink-faint">迷宫尺寸</label>
+              <label className="text-[11px] font-semibold text-ink-faint">{t('lab.size')}</label>
               <div className="flex rounded-lg border border-edge/60 bg-sunken p-0.5">
                 {SIZES.map((item) => (
                   <button
@@ -335,7 +338,7 @@ export function LabPanel() {
                         : 'text-ink-dim hover:text-ink'
                     }`}
                   >
-                    {item.label}
+                    {t(item.label)}
                   </button>
                 ))}
               </div>
@@ -343,14 +346,14 @@ export function LabPanel() {
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-ink-faint">种子</label>
+                <label className="text-[11px] font-semibold text-ink-faint">{t('lab.seed')}</label>
                 <button
                   type="button"
                   onClick={handleRandomSeed}
                   className="flex items-center gap-1 text-[11px] text-cyber-accent hover:underline"
                 >
                   <Shuffle className="w-3.5 h-3.5" />
-                  <span>随机种子</span>
+                  <span>{t('lab.randomSeed')}</span>
                 </button>
               </div>
               <input
@@ -360,7 +363,7 @@ export function LabPanel() {
                 className="h-10 w-full rounded-xl border border-edge/70 bg-sunken/80 px-3.5 text-xs text-ink placeholder:text-ink-faint focus:border-cyber-accent focus:outline-none transition-colors"
               />
               <p className="text-[11px] leading-snug text-ink-faint">
-                同一串种子 = 同一张迷宫 · 换种子就换一张图拆
+                {t('lab.seedHint')}
               </p>
             </div>
           </div>
@@ -368,7 +371,7 @@ export function LabPanel() {
           {/* 播放器与时间轴控制器（规范 6.5 节） */}
           <div className="rounded-xl border border-edge/60 bg-sunken/50 p-3 space-y-3">
             <div className="flex items-center justify-between gap-2 text-[11px]">
-              <span className="truncate font-semibold text-ink-faint">时间轴步进</span>
+              <span className="truncate font-semibold text-ink-faint">{t('lab.timeline')}</span>
               <span className="shrink-0 whitespace-nowrap font-semibold text-ink tabular-nums">
                 {stepIndex} / {totalSteps} ({totalSteps > 0 ? Math.round((stepIndex / totalSteps) * 100) : 0}%)
               </span>
@@ -403,21 +406,21 @@ export function LabPanel() {
             <div className="flex items-center gap-1.5 pt-1">
               <button
                 onClick={handleJumpStart}
-                title="回到开头"
+                title={t('lab.jumpStart')}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge/40 bg-surface/40 text-ink-dim transition-colors hover:text-ink"
               >
                 <ChevronsLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={handleStepBack}
-                title="后退一步"
+                title={t('lab.stepBack')}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge/40 bg-surface/40 text-ink-dim transition-colors hover:text-ink"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={handleTogglePlay}
-                title={isPlaying ? '暂停' : '播放'}
+                title={isPlaying ? t('lab.pause') : t('lab.play')}
                 className={`flex h-11 w-11 items-center justify-center rounded-xl font-semibold transition-all ${
                   isPlaying
                     ? 'bg-warn text-accent-ink'
@@ -432,14 +435,14 @@ export function LabPanel() {
               </button>
               <button
                 onClick={handleStepForward}
-                title="前进一步"
+                title={t('lab.stepForward')}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge/40 bg-surface/40 text-ink-dim transition-colors hover:text-ink"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
               <button
                 onClick={handleJumpEnd}
-                title="跳到末尾"
+                title={t('lab.jumpEnd')}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge/40 bg-surface/40 text-ink-dim transition-colors hover:text-ink"
               >
                 <ChevronsRight className="w-4 h-4" />
@@ -448,7 +451,7 @@ export function LabPanel() {
 
             {/* 播放速度：单独一行，避免和 5 个传输键挤在同一行被裁切 */}
             <div className="flex items-center justify-between border-t border-edge/30 pt-2">
-              <span className="text-[11px] text-ink-faint">播放速度</span>
+              <span className="text-[11px] text-ink-faint">{t('lab.speed')}</span>
               <div className="flex rounded-lg border border-edge/40 bg-sunken/60 p-0.5">
                 {SPEEDS.map((sp) => (
                   <button
@@ -472,46 +475,44 @@ export function LabPanel() {
           {phase === 'generate' ? (
             <div className="rounded-xl border border-edge/60 bg-sunken/40 p-3 space-y-2">
               <div className="text-[11px] font-semibold text-ink-faint flex items-center justify-between">
-                <span>生成树图论指标</span>
-                <span>双向 BFS 度量</span>
+                <span>{t('lab.genMetrics')}</span>
+                <span>{t('lab.bfsMetric')}</span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div className="p-2 bg-surface/60 rounded-lg border border-edge/60">
-                  <div className="text-ink-faint text-[11px]">死胡同数量 (度=1)</div>
+                  <div className="text-ink-faint text-[11px]">{t('lab.deadEnds')}</div>
                   <div className="text-sm font-semibold text-ink tabular-nums">
                     {genModel.stats.deadEndCount}
                   </div>
                 </div>
                 <div className="p-2 bg-surface/60 rounded-lg border border-edge/60">
-                  <div className="text-ink-faint text-[11px]">树直径 (最长路径)</div>
+                  <div className="text-ink-faint text-[11px]">{t('lab.treeDiameter')}</div>
                   <div className="text-sm font-semibold text-ink tabular-nums">
-                    {genModel.stats.treeDiameter} 格
+                    {t('lab.cells', { n: genModel.stats.treeDiameter })}
                   </div>
                 </div>
                 <div className="p-2 bg-surface/60 rounded-lg border border-edge/60">
-                  <div className="text-ink-faint text-[11px]">起点到出口距离</div>
+                  <div className="text-ink-faint text-[11px]">{t('lab.startExit')}</div>
                   <div className="text-sm font-semibold text-ink tabular-nums">
-                    {genModel.stats.startExitPathLength} 格
+                    {t('lab.cells', { n: genModel.stats.startExitPathLength })}
                   </div>
                 </div>
                 <div className="p-2 bg-surface/60 rounded-lg border border-edge/60">
-                  <div className="text-ink-faint text-[11px]">房间数 / 边数</div>
+                  <div className="text-ink-faint text-[11px]">{t('lab.roomsEdges')}</div>
                   <div className="text-sm font-semibold text-ink tabular-nums">
                     {genModel.stats.totalRooms} / {genModel.stats.totalRooms - 1}
                   </div>
                 </div>
               </div>
               <p className="text-xs text-ink-dim leading-relaxed pt-1">
-                {genAlgo === 'dfs'
-                  ? 'DFS 回溯特性：分支较少、路径深邃曲折且树直径较大，适合产生迷宫长走廊。'
-                  : 'Prim 算法特性：生成细小分叉与大量死胡同，树直径较小，分支呈放射状簇拥。'}
+                {genAlgo === 'dfs' ? t('lab.dfsDesc') : t('lab.primDesc')}
               </p>
             </div>
           ) : (
             <div className="rounded-xl border border-edge/60 bg-sunken/40 p-3 space-y-2">
               <div className="text-[11px] font-semibold text-ink-faint flex items-center justify-between">
-                <span>三算法全局对比</span>
-                <span>起点 → 出口</span>
+                <span>{t('lab.comparison')}</span>
+                <span>{t('lab.startToExit')}</span>
               </div>
 
               {/* 算法对比表（规范 6.5：选中行 bg-cyber-accent/15，数值 tabular-nums，无彩色杂音） */}
@@ -519,10 +520,10 @@ export function LabPanel() {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-edge/60 text-ink-faint text-[11px]">
-                      <th className="py-1">算法</th>
-                      <th className="py-1 text-center">展开节点</th>
-                      <th className="py-1 text-center">路径长</th>
-                      <th className="py-1 text-right">探索率</th>
+                      <th className="py-1">{t('lab.thAlgo')}</th>
+                      <th className="py-1 text-center">{t('lab.thExpanded')}</th>
+                      <th className="py-1 text-center">{t('lab.thPath')}</th>
+                      <th className="py-1 text-right">{t('lab.thRatio')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-edge/40">
@@ -554,21 +555,23 @@ export function LabPanel() {
 
               <div className="p-2.5 rounded-lg border border-edge/60 bg-sunken/60 text-xs text-ink-dim leading-relaxed space-y-1">
                 <div>
-                  在完美迷宫中三种算法找到同一条路径，区别在于搜索了多少格子。
+                  {t('lab.samePath')}
                 </div>
                 <div className="text-ink">
                   {solveAlgo === 'bfs'
-                    ? 'BFS：像水波一圈圈扩散，最先碰到终点，路必然最短。'
+                    ? t('lab.bfsNote')
                     : solveAlgo === 'dfs'
-                    ? 'DFS：一条道走到黑，撞墙才回头——常常绕远。'
-                    : 'A*：朝着终点方向优先探索，少走冤枉路。'}
+                    ? t('lab.dfsNote')
+                    : t('lab.astarNote')}
                 </div>
                 <div className="text-[11px] text-ink-faint">
-                  当前 {solveModel.algo.toUpperCase()} 展开:{' '}
+                  {t('lab.currentExpanded', { algo: solveModel.algo.toUpperCase() })}{' '}
                   <span className="font-semibold text-ink tabular-nums">
-                    {solveModel.getExpandedCountAt(stepIndex)} / {solveModel.stats.expandedCount}
-                  </span>{' '}
-                  格
+                    {t('lab.currentExpandedValue', {
+                      n: solveModel.getExpandedCountAt(stepIndex),
+                      total: solveModel.stats.expandedCount,
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -579,7 +582,7 @@ export function LabPanel() {
         <div className="border-t border-edge/40 bg-sunken/30 px-4 py-2.5">
           <div className="flex items-start gap-2">
             <span className="mt-[1px] shrink-0 rounded border border-cyber-accent/30 px-1.5 py-0.5 text-[11px] font-semibold text-cyber-accent">
-              逐步解说
+              {t('lab.narration')}
             </span>
             <p className="text-[11px] leading-relaxed text-ink-dim">{currentNarration}</p>
           </div>

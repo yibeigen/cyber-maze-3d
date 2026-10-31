@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Maze } from '../core/grid'
 import { THEMES } from '../core/themes'
+import { useT } from '../i18n/store'
 import { useGameStore } from '../state/useGameStore'
 import { computeMazeBox, drawMaze, mazePalette } from './mazeDraw'
 
@@ -19,6 +20,7 @@ interface MazeMiniMapProps {
  * canvas 尺寸跟随容器（ResizeObserver），dpr 上限 2，配色随主题实时读取 CSS 变量。
  */
 export function MazeMiniMap({ maze, path, playerPath, replayToken = 0, className }: MazeMiniMapProps) {
+  const t = useT()
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const themeKey = useGameStore((s) => s.theme)
@@ -84,7 +86,7 @@ export function MazeMiniMap({ maze, path, playerPath, replayToken = 0, className
       <canvas
         ref={canvasRef}
         role="img"
-        aria-label="本局迷宫、最优路径与真实轨迹回放"
+        aria-label={t('minimap.aria')}
         style={{ width: '100%', height: '100%', display: 'block' }}
       />
     </div>

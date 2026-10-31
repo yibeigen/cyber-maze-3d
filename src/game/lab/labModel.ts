@@ -3,6 +3,7 @@ import { GenAlgo, generate, GenEvent, pickStartExit } from '../core/generate'
 import { DIRS, edgeCount, neighbor } from '../core/grid'
 import { rngFor } from '../core/rng'
 import { solve, SolveAlgo, SolveEvent } from '../core/solve'
+import { Lang, tMsg } from '../i18n/messages'
 
 export type LabPhase = 'generate' | 'solve'
 
@@ -284,13 +285,16 @@ export function createLabGenModel(
 /**
  * 生成阶段：当前步的动态解说（实验室底部字幕条用，讲人话不报坐标）
  */
-export function describeGenStep(model: LabGenModel, stepIndex: number): string {
+export function describeGenStep(model: LabGenModel, stepIndex: number, lang: Lang = 'zh'): string {
   const { trace, carvedAt, visitedAt, stats } = model
   if (stepIndex <= 0) {
-    return '迷宫从一格开始：接下来每一步都在"打墙开路"，墙落下去的地方就是通道。'
+    return tMsg(lang, 'lab.narration.genStart')
   }
   if (stepIndex >= model.totalSteps) {
-    return `生成完毕：${stats.totalRooms} 个房间、${stats.totalRooms - 1} 条通道，全部连通、绝无环路。`
+    return tMsg(lang, 'lab.narration.genDone', {
+      rooms: stats.totalRooms,
+      edges: stats.totalRooms - 1,
+    })
   }
 
   let carved = 0
@@ -305,13 +309,13 @@ export function describeGenStep(model: LabGenModel, stepIndex: number): string {
   const ev = trace[Math.min(stepIndex - 1, trace.length - 1)]
   switch (ev.t) {
     case 'carve':
-      return `这一步打穿一面墙、钻进新房间——已打通 ${carved} 条通道`
+      return tMsg(lang, 'lab.narration.carve', { n: carved })
     case 'visit':
-      return `这一步走进新房间——已探索 ${visited}/${stats.totalRooms} 格`
+      return tMsg(lang, 'lab.narration.visit', { v: visited, total: stats.totalRooms })
     case 'backtrack':
-      return '这条道到头了，退回上一个岔路口换条路（回溯）'
+      return tMsg(lang, 'lab.narration.backtrack')
     case 'frontier':
-      return '先把旁边的房间记为候选（紫色），稍后随机挑一个继续生长'
+      return tMsg(lang, 'lab.narration.frontier')
     default:
       return ''
   }
@@ -320,14 +324,14 @@ export function describeGenStep(model: LabGenModel, stepIndex: number): string {
 /**
  * 求解阶段：当前步的动态解说
  */
-export function describeSolveStep(model: LabSolveModel, stepIndex: number): string {
+export function describeSolveStep(model: LabSolveModel, stepIndex: number, lang: Lang = 'zh'): string {
   const { trace, poppedAt } = model
   const totalRooms = poppedAt.length
   if (stepIndex <= 0) {
-    return '从起点出发：每处理一个格子，就把它四周还没见过的格子记为候选（紫色）。'
+    return tMsg(lang, 'lab.narration.solveStart')
   }
   if (model.isPathVisible(stepIndex)) {
-    return `抵达出口！金色地砖和光轨就是最短路，共 ${model.path ? model.path.length - 1 : 0} 步`
+    return tMsg(lang, 'lab.narration.solveDone', { n: model.path ? model.path.length - 1 : 0 })
   }
 
   let expanded = 0
@@ -337,9 +341,9 @@ export function describeSolveStep(model: LabSolveModel, stepIndex: number): stri
 
   const ev = trace[Math.min(stepIndex - 1, trace.length - 1)]
   if (ev.t === 'push') {
-    return `把一个新格子记为候选——已展开 ${expanded}/${totalRooms} 格`
+    return tMsg(lang, 'lab.narration.push', { n: expanded, total: totalRooms })
   }
-  return `处理一个格子、向四周扩散——已展开 ${expanded}/${totalRooms} 格`
+  return tMsg(lang, 'lab.narration.pop', { n: expanded, total: totalRooms })
 }
 
 /**
@@ -375,7 +379,8 @@ export function createLabSolveModel(
   algo: SolveAlgo,
   open: Uint8Array,
   start: number,
-  exit: number
+  exit: number,
+  lang: Lang = 'zh'
 ): LabSolveModel {
   const totalRooms = w * h
   const res = solve(algo, { w, h }, start, exit, (e) => open[e] === 1)
@@ -401,9 +406,9 @@ export function createLabSolveModel(
 
   // 计算三种算法对比表
   const comparison: SolverComparisonItem[] = [
-    computeComparisonItem('bfs', '广度优先 (BFS)', w, h, start, exit, open),
-    computeComparisonItem('dfs', '深度优先 (DFS)', w, h, start, exit, open),
-    computeComparisonItem('astar', 'A* 启发式', w, h, start, exit, open),
+    computeComparisonItem('bfs', tMsg(lang, 'lab.algo.bfs'), w, h, start, exit, open),
+    computeComparisonItem('dfs', tMsg(lang, 'lab.algo.dfs'), w, h, start, exit, open),
+    computeComparisonItem('astar', tMsg(lang, 'lab.algo.astar'), w, h, start, exit, open),
   ]
 
   const stats: LabSolveStats = {

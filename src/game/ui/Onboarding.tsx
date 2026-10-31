@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Check, Radar, Sparkles, X, Zap } from 'lucide-react'
 import { useState } from 'react'
+import { TFunction, useT } from '../i18n/store'
 import { setOnboardingCompleted } from '../state/persistence'
 import { panelMotion } from './motion'
 
@@ -24,44 +25,48 @@ interface Step {
   points: Point[]
 }
 
-const STEPS: Step[] = [
-  {
-    icon: Zap,
-    iconColor: 'text-warn',
-    title: '动力学重排 · 双色预警',
-    subtitle: '阶段 1 / 3',
-    desc: '迷宫机械墙每约 15 秒重新排布一次。注意墙体顶部的脉冲预警：',
-    points: [
-      { tag: '琥珀脉冲', text: '即将升起封路，请提前绕开', tone: 'warn' },
-      { tag: '翡翠闪烁', text: '即将降下开通新路，可顺势前进', tone: 'ok' },
-    ],
-  },
-  {
-    icon: Radar,
-    iconColor: 'text-cyber-accent',
-    title: '全息扫描 · 最优寻路',
-    subtitle: '阶段 2 / 3',
-    desc: '迷路或遭遇封堵时，点右下角扫描按钮（或按 F 键）召唤算法助手：',
-    points: [
-      { tag: '全息光轨', text: 'A* 启发式展开，实时标出当前最优逃生路线' },
-      { tag: '俯瞰全景', text: '按住空格或俯瞰按钮，拉升至天眼视角看全图' },
-    ],
-  },
-  {
-    icon: Sparkles,
-    iconColor: 'text-cyber-accent',
-    title: '信标目标 · 数学保证',
-    subtitle: '阶段 3 / 3',
-    desc: '避开机械墙，以最少步数与最短时间抵达粉色发光信标：',
-    points: [
-      { tag: '图论不变量', text: '生成树边置换，每次重构都严格保证起点到终点连通' },
-      { tag: '永有出路', text: '墙怎么动，A* 就怎么算——解永远在' },
-    ],
-  },
-]
+function buildSteps(t: TFunction): Step[] {
+  return [
+    {
+      icon: Zap,
+      iconColor: 'text-warn',
+      title: t('onboarding.step1.title'),
+      subtitle: t('onboarding.step1.subtitle'),
+      desc: t('onboarding.step1.desc'),
+      points: [
+        { tag: t('onboarding.step1.point1.tag'), text: t('onboarding.step1.point1.text'), tone: 'warn' },
+        { tag: t('onboarding.step1.point2.tag'), text: t('onboarding.step1.point2.text'), tone: 'ok' },
+      ],
+    },
+    {
+      icon: Radar,
+      iconColor: 'text-cyber-accent',
+      title: t('onboarding.step2.title'),
+      subtitle: t('onboarding.step2.subtitle'),
+      desc: t('onboarding.step2.desc'),
+      points: [
+        { tag: t('onboarding.step2.point1.tag'), text: t('onboarding.step2.point1.text') },
+        { tag: t('onboarding.step2.point2.tag'), text: t('onboarding.step2.point2.text') },
+      ],
+    },
+    {
+      icon: Sparkles,
+      iconColor: 'text-cyber-accent',
+      title: t('onboarding.step3.title'),
+      subtitle: t('onboarding.step3.subtitle'),
+      desc: t('onboarding.step3.desc'),
+      points: [
+        { tag: t('onboarding.step3.point1.tag'), text: t('onboarding.step3.point1.text') },
+        { tag: t('onboarding.step3.point2.tag'), text: t('onboarding.step3.point2.text') },
+      ],
+    },
+  ]
+}
 
 export function Onboarding({ onDismiss }: OnboardingProps) {
+  const t = useT()
   const [currentStep, setCurrentStep] = useState(0)
+  const STEPS = buildSteps(t)
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -102,8 +107,8 @@ export function Onboarding({ onDismiss }: OnboardingProps) {
           <button
             onClick={handleComplete}
             className="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-sunken hover:text-ink"
-            title="跳过引导"
-            aria-label="跳过引导"
+            title={t('onboarding.skipTitle')}
+            aria-label={t('onboarding.skipTitle')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -155,13 +160,13 @@ export function Onboarding({ onDismiss }: OnboardingProps) {
               onClick={handleComplete}
               className="min-h-[36px] rounded-lg px-2 text-xs text-ink-dim transition-colors hover:text-ink"
             >
-              跳过引导
+              {t('onboarding.skip')}
             </button>
             <button
               onClick={handleNext}
               className="flex min-h-[44px] items-center gap-2 rounded-xl bg-cyber-accent px-5 text-sm font-semibold text-accent-ink transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
             >
-              <span>{currentStep === STEPS.length - 1 ? '开始探险' : '下一步'}</span>
+              <span>{currentStep === STEPS.length - 1 ? t('onboarding.begin') : t('common.next')}</span>
               {currentStep === STEPS.length - 1 ? (
                 <Check className="w-4 h-4" />
               ) : (

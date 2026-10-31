@@ -16,6 +16,7 @@ import { controller } from '../controller'
 import { solve } from '../core/solve'
 import { MazeSize } from '../core/constants'
 import { THEMES, VisualTheme } from '../core/themes'
+import { levelName, themeName, useLang, useT } from '../i18n/store'
 import { buildShareUrl, copyToClipboard } from '../state/persistence'
 import { useGameStore } from '../state/useGameStore'
 import { MazeMiniMap } from './MazeMiniMap'
@@ -53,6 +54,8 @@ function StatItem({ label, value }: { label: string; value: string }) {
 }
 
 export function ResultPanel() {
+  const t = useT()
+  const lang = useLang()
   const lastResult = useGameStore((s) => s.lastResult)
   const bestTimeMs = useGameStore((s) => s.bestTimeMs)
   const activeSeed = useGameStore((s) => s.activeSeed)
@@ -89,24 +92,31 @@ export function ResultPanel() {
   const gradeColor = grade ? GRADE_COLORS[grade] ?? 'rgb(var(--ink-dim))' : ''
   // 亮主题下 24px 同色光晕会糊成一团灰雾，只保留颜色不加发光
   const gradeGlow = THEMES[themeKey]?.id === 'light' || grade === 'C' ? 'none' : '0 0 24px currentColor'
+  const levelTitle = activeLevel
+    ? t('hud.taskLevelTitle', { n: activeLevel.id, name: levelName(lang, activeLevel) })
+    : ''
 
   const handleCycleTheme = () => {
     const list: VisualTheme[] = ['cyber', 'aurora', 'light']
     const next = list[(list.indexOf(themeKey) + 1) % list.length]
     setTheme(next)
-    showToast(`主题：${THEMES[next].name}`, 'info')
+    showToast(t('result.themeToast', { name: themeName(lang, next) }), 'info')
   }
 
   const handleShareLink = async () => {
     const url = buildShareUrl(size, shifting, activeSeed, activeLevel?.id)
-    const text = `我在 ${maze ? `${maze.w}×${maze.h}` : SIZE_LABELS[size]} 迷宫用时 ${formatTime(lastResult.elapsed)}${
-      grade ? `、评级 ${grade}` : ''
-    }——${shifting ? '墙会变形，出路永远在' : '同款种子，同款迷宫'}。来破？\n${url}`
+    const text = t('share.resultLine', {
+      size: maze ? `${maze.w}×${maze.h}` : SIZE_LABELS[size],
+      time: formatTime(lastResult.elapsed),
+      grade: grade ? t('share.grade', { grade }) : '',
+      flavor: t(shifting ? 'share.flavorShifting' : 'share.flavorStatic'),
+      url,
+    })
     const ok = await copyToClipboard(text)
     if (ok) {
-      showToast('已复制挑战文案与链接', 'success')
+      showToast(t('result.shareCopied'), 'success')
     } else {
-      showToast('复制失败，请手动复制', 'warn')
+      showToast(t('hud.copyFail'), 'warn')
     }
   }
 
@@ -128,14 +138,15 @@ export function ResultPanel() {
         maze,
         path: optimalPath,
         playerPath,
-        levelText: activeLevel ? `第 ${activeLevel.id} 关 · ${activeLevel.name}` : undefined,
+        levelText: activeLevel ? levelTitle : undefined,
         stars: lastResult.stars,
         theme: themeKey,
+        lang,
       })
       setShareCardUrl(url)
     } catch (err) {
       console.error('[shareCard] 生成失败', err)
-      showToast('战报图生成失败', 'warn')
+      showToast(t('result.cardFailed'), 'warn')
     } finally {
       setGeneratingCard(false)
     }
@@ -149,7 +160,7 @@ export function ResultPanel() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    showToast('战报图已保存', 'success')
+    showToast(t('result.cardSaved'), 'success')
   }
 
   return (
@@ -166,8 +177,8 @@ export function ResultPanel() {
             {/* 主题切换：暗色/亮色当场切换，不用退回标题页 */}
             <button
               onClick={handleCycleTheme}
-              title={`切换视觉主题（当前：${THEMES[themeKey]?.name ?? '赛博深空'}）`}
-              aria-label="切换视觉主题"
+              title={t('result.themeSwitchTitle', { name: themeName(lang, themeKey) })}
+              aria-label={t('result.themeSwitchAria')}
               className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors duration-150 hover:bg-surface/60 hover:text-ink"
             >
               <Palette className="w-4 h-4" />
@@ -175,14 +186,14 @@ export function ResultPanel() {
             {lastResult.isNewRecord && (
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-warn">
                 <Award className="w-4 h-4" />
-                <span>★ 新纪录</span>
+                <span>{t('result.newRecord')}</span>
               </div>
             )}
             <h2 className="text-2xl font-bold tracking-tight text-ink">
-              {activeLevel ? `第 ${activeLevel.id} 关 · ${activeLevel.name}` : '迷宫已破解'}
+              {activeLevel ? levelTitle : t('result.titleWin')}
             </h2>
             {activeLevel && (
-              <div className="flex items-center justify-center gap-1 pt-1" aria-label={`获得 ${lastResult.stars} 星`}>
+              <div className="flex items-center justify-center gap-1 pt-1" aria-label={t('result.starsAria', { n: lastResult.stars ?? 0 })}>
                 {[1, 2, 3].map((star) => (
                   <Star
                     key={star}
@@ -200,7 +211,7 @@ export function ResultPanel() {
                 <MazeMiniMap maze={maze} path={optimalPath} playerPath={playerPath} replayToken={replayToken} className="h-full w-full" />
               ) : (
                 <div className="flex h-full items-center justify-center px-2 text-center text-[11px] text-ink-faint">
-                  迷宫数据不可用
+                  {t('result.noMaze')}
                 </div>
               )}
             </div>
@@ -214,28 +225,30 @@ export function ResultPanel() {
                   >
                     {grade}
                   </div>
-                  <div className="mt-1 text-[11px] text-ink-faint">路径效率</div>
+                  <div className="mt-1 text-[11px] text-ink-faint">{t('result.efficiency')}</div>
                 </div>
               )}
 
               <div className="space-y-1 rounded-xl glass-inset px-2.5 py-2 text-[11px] leading-tight text-ink-dim">
                 <div className="flex items-center gap-1.5">
                   <span className="h-0.5 w-3 shrink-0 bg-cyber-accent" />
-                  当前最优 {hasOptimal ? `${optimal} 步` : '—'}
+                  {hasOptimal ? t('result.optimal', { n: optimal }) : t('result.optimalUnknown')}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-0.5 w-3 shrink-0 border-t border-dashed border-[#f472b6]" />
-                  <span className="min-w-0 truncate">真实轨迹 · {extra === 0 ? '一步没绕' : `多走 ${extra} 步`}</span>
+                  <span className="min-w-0 truncate">
+                    {t('result.realPath', { state: extra === 0 ? t('result.noDetour') : t('result.extra', { n: extra }) })}
+                  </span>
                   {!reducedMotion && playerPath && playerPath.length > 1 && (
                     <button
                       type="button"
                       onClick={() => setReplayToken((n) => n + 1)}
-                      title="从头重播真实轨迹"
-                      aria-label="从头重播真实轨迹"
+                      title={t('result.replayTitle')}
+                      aria-label={t('result.replayTitle')}
                       className="ml-auto flex shrink-0 items-center gap-0.5 rounded-md px-1 py-0.5 text-[11px] text-ink-faint transition-colors hover:bg-surface/70 hover:text-ink active:scale-95"
                     >
                       <RefreshCw className="h-3 w-3" />
-                      重播
+                      {t('result.replay')}
                     </button>
                   )}
                 </div>
@@ -245,21 +258,21 @@ export function ResultPanel() {
 
           {/* 图论承诺 */}
           <div className="text-center text-[11px] leading-relaxed text-ink-faint">
-            ── {shifting ? '轨迹为最终地图投影 · 出路永远在' : '墙怎么变，出路永远在（图论保证）'} ──
+            ── {t(shifting ? 'result.promiseShifting' : 'result.promiseStatic')} ──
           </div>
 
           {/* 数据带 */}
           <div className="grid grid-cols-4 divide-x divide-edge/30 rounded-xl glass-inset py-2.5">
-            <StatItem label="用时" value={formatTime(lastResult.elapsed)} />
-            <StatItem label="步数" value={`${lastResult.moves}`} />
-            <StatItem label="重构" value={`${lastResult.shiftsDone}`} />
-            <StatItem label="扫描" value={`${lastResult.scansUsed}`} />
+            <StatItem label={t('result.statTime')} value={formatTime(lastResult.elapsed)} />
+            <StatItem label={t('result.statMoves')} value={`${lastResult.moves}`} />
+            <StatItem label={t('result.statShifts')} value={`${lastResult.shiftsDone}`} />
+            <StatItem label={t('result.statScans')} value={`${lastResult.scansUsed}`} />
           </div>
 
           <div className="flex items-center justify-between px-1 text-[11px] text-ink-dim">
-            <span>{hasOptimal ? '生成树不变量 · 零死锁' : '本局无最优路径参照'}</span>
+            <span>{t(hasOptimal ? 'result.invariant' : 'result.noOptimal')}</span>
             <span className="tabular-nums">
-              该种子最佳 {bestTimeMs ? formatTime(bestTimeMs / 1000) : '--:--.-'}
+              {t('result.bestSeed', { time: bestTimeMs ? formatTime(bestTimeMs / 1000) : '--:--.-' })}
             </span>
           </div>
 
@@ -270,13 +283,13 @@ export function ResultPanel() {
                 onClick={() => controller.nextLevel()}
                 className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-cyber-accent px-5 text-sm font-semibold text-accent-ink transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
               >
-                <span>下一关 · 第 {activeLevel.id + 1} 关</span>
+                <span>{t('result.nextLevel', { n: activeLevel.id + 1 })}</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             )}
             {activeLevel?.id === 12 && (
               <div className="rounded-xl border border-warn/40 bg-warn/10 px-4 py-3 text-center text-sm font-semibold text-warn">
-                十二章全部贯通 · 全息迷宫大师
+                {t('result.allDone')}
               </div>
             )}
             <button
@@ -285,7 +298,7 @@ export function ResultPanel() {
               className={`flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${activeLevel ? 'border border-edge/60 bg-surface/40 text-ink hover:bg-surface/70' : 'bg-cyber-accent text-accent-ink hover:brightness-110'}`}
             >
               <Sparkles className="w-4 h-4 fill-current" />
-              <span>{generatingCard ? '正在生成战报…' : '保存战报'}</span>
+              <span>{t(generatingCard ? 'result.generating' : 'result.saveCard')}</span>
             </button>
 
             <div className="grid grid-cols-2 gap-2">
@@ -294,7 +307,7 @@ export function ResultPanel() {
                 className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-edge/60 bg-surface/40 px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:border-edge hover:bg-surface/70 active:scale-[0.98]"
               >
                 <Play className="w-4 h-4 fill-current" />
-                <span>再来一次</span>
+                <span>{t('result.again')}</span>
               </button>
 
               <button
@@ -302,7 +315,7 @@ export function ResultPanel() {
                 className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-edge/60 bg-surface/40 px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:border-edge hover:bg-surface/70 active:scale-[0.98]"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span>新迷宫</span>
+                <span>{t('result.newMaze')}</span>
               </button>
             </div>
 
@@ -312,19 +325,19 @@ export function ResultPanel() {
                 className="flex min-h-[36px] items-center gap-1.5 rounded-lg px-2 text-xs text-ink-dim transition-colors duration-150 hover:bg-surface/60 hover:text-ink"
               >
                 <Share2 className="w-3.5 h-3.5" />
-                <span>复制挑战文案</span>
+                <span>{t('result.copyChallenge')}</span>
               </button>
               <button
                 onClick={() => controller.toMenu()}
                 className="min-h-[36px] rounded-lg px-2 text-xs text-ink-dim transition-colors duration-150 hover:bg-surface/60 hover:text-ink"
               >
-                返回主菜单
+                {t('common.returnMenu')}
               </button>
             </div>
 
             {/* 底部作者版权微标 */}
             <div className="pt-2 text-center text-[10px] text-ink-faint">
-              CyberMaze 3D · 艺杯羹作品 · 关注公众号【艺杯羹】
+              {t('result.footer')}
             </div>
           </div>
         </motion.div>
@@ -347,14 +360,14 @@ export function ResultPanel() {
               </button>
 
               <div className="space-y-0.5 text-center">
-                <div className="text-sm font-semibold text-ink">战报已生成</div>
-                <div className="text-[11px] text-ink-dim">手机端可长按图片保存</div>
+                <div className="text-sm font-semibold text-ink">{t('result.cardReady')}</div>
+                <div className="text-[11px] text-ink-dim">{t('result.cardHint')}</div>
               </div>
 
               <div className="flex max-h-[60vh] w-full items-center justify-center overflow-hidden rounded-xl border border-edge/40 bg-black/30">
                 <img
                   src={shareCardUrl}
-                  alt="战报"
+                  alt={t('result.cardAlt')}
                   className="pointer-events-auto h-auto max-h-[60vh] w-full select-auto object-contain"
                 />
               </div>
@@ -365,13 +378,13 @@ export function ResultPanel() {
                   className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-cyber-accent px-4 text-sm font-semibold text-accent-ink transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
                 >
                   <Download className="w-4 h-4" />
-                  <span>下载图片</span>
+                  <span>{t('result.download')}</span>
                 </button>
                 <button
                   onClick={() => setShareCardUrl(null)}
                   className="min-h-[44px] rounded-xl border border-edge/60 bg-surface/40 px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-surface/70"
                 >
-                  关闭
+                  {t('common.close')}
                 </button>
               </div>
             </motion.div>

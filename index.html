@@ -112,9 +112,9 @@
         <div style="width:56px;height:56px;margin-bottom:18px;animation:pulseSlow 2s ease-in-out infinite;">
           <img src="./favicon.svg" alt="CyberMaze 3D" style="width:100%;height:100%;border-radius:14px;box-shadow:0 8px 24px rgba(2,132,199,0.25);" />
         </div>
-        <h1 style="font-size:15px;font-weight:700;letter-spacing:0.12em;color:#0284c7;margin:0 0 8px;">CyberMaze 3D 活墙</h1>
-        <p style="font-size:12px;color:#475569;letter-spacing:0.04em;margin:0 0 8px;">会重排的 3D 赛博朋克迷宫 · 永远有路</p>
-        <div style="font-size:12px;color:#475569;letter-spacing:0.04em;margin-bottom:20px;">正在构建迷宫拓扑…</div>
+        <h1 id="boot-title" style="font-size:15px;font-weight:700;letter-spacing:0.12em;color:#0284c7;margin:0 0 8px;">CyberMaze 3D 活墙</h1>
+        <p id="boot-subtitle" style="font-size:12px;color:#475569;letter-spacing:0.04em;margin:0 0 8px;">会重排的 3D 赛博朋克迷宫 · 永远有路</p>
+        <div id="boot-status" style="font-size:12px;color:#475569;letter-spacing:0.04em;margin-bottom:20px;">正在构建迷宫拓扑…</div>
         <div style="width:140px;height:3px;background:rgba(2,132,199,0.15);border-radius:9999px;overflow:hidden;position:relative;">
           <div style="position:absolute;top:0;left:0;width:50px;height:100%;background:#0284c7;border-radius:9999px;animation:scanBar 1.4s ease-in-out infinite;"></div>
         </div>
@@ -127,6 +127,23 @@
         <p><a href="https://yibeigen.github.io/cyber-maze-3d/">在线试玩</a> · <a href="https://github.com/yibeigen/cyber-maze-3d">GitHub 源码</a></p>
       </div>
     </noscript>
+    <script>
+      // 首屏骨架与文档元信息跟随上次选择的语言；默认中文，不依赖 React 即可生效
+      try {
+        if (localStorage.getItem('ckl:settings:lang') === 'en') {
+          document.documentElement.lang = 'en'
+          document.title = 'CyberMaze 3D · Living Walls — Play a 3D Cyber Maze Online'
+          var desc = document.querySelector('meta[name="description"]')
+          if (desc) desc.setAttribute('content', 'Play CyberMaze 3D (Living Walls): a 3D cyberpunk maze that reshapes itself. A spanning-tree invariant guarantees the exit is always reachable, with live A* pathfinding, three themes, first/third-person views and touch controls. No download needed.')
+          var title = document.getElementById('boot-title')
+          var subtitle = document.getElementById('boot-subtitle')
+          var status = document.getElementById('boot-status')
+          if (title) title.textContent = 'CYBERMAZE 3D · LIVING WALLS'
+          if (subtitle) subtitle.textContent = 'A 3D cyber maze that reshapes · always a way out'
+          if (status) status.textContent = 'Building maze topology…'
+        }
+      } catch (e) {}
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

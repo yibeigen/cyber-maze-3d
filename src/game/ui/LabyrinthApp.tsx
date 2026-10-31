@@ -2,6 +2,7 @@ import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
 import { Eye } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { controller } from '../controller'
+import { useT } from '../i18n/store'
 import { useKeyboardInput } from '../input/useKeyboardInput'
 import { useSwipeInput } from '../input/useSwipeInput'
 import { GameCanvas } from '../scene/GameCanvas'
@@ -24,6 +25,7 @@ const LabPanel = lazy(() =>
 )
 
 export function LabyrinthApp() {
+  const t = useT()
   // 挂载全局键盘与触控滑动手势侦听
   useKeyboardInput()
   useSwipeInput()
@@ -90,12 +92,12 @@ export function LabyrinthApp() {
                   transition={{ duration: 5, times: [0, 0.12, 0.72, 1] }}
                   className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full glass-panel px-3 py-1 text-[11px] text-ink-dim"
                 >
-                  电影模式 · 按 H 退出
+                  {t('app.cinematicExit')}
                 </motion.div>
                 <button
                   onClick={toggleCinematic}
-                  title="退出电影模式 (H)"
-                  aria-label="退出电影模式"
+                  title={t('app.cinematicExitTitle')}
+                  aria-label={t('app.cinematicExitAria')}
                   className="pointer-events-auto absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg glass-panel text-ink-dim opacity-25 transition-opacity hover:opacity-100"
                 >
                   <Eye className="w-4 h-4" />
@@ -110,8 +112,8 @@ export function LabyrinthApp() {
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   className="space-y-1 rounded-2xl glass-panel px-5 py-3 text-center"
                 >
-                  <div className="text-sm font-bold text-ink">正在构建迷宫拓扑</div>
-                  <div className="text-[11px] text-cyber-accent">轻触屏幕或按任意键跳过</div>
+                  <div className="text-sm font-bold text-ink">{t('app.revealBuilding')}</div>
+                  <div className="text-[11px] text-cyber-accent">{t('app.revealSkip')}</div>
                 </motion.div>
               </div>
             )}
@@ -130,22 +132,22 @@ export function LabyrinthApp() {
               <div className="absolute inset-0 z-50 flex items-center justify-center p-4 pointer-events-auto">
                 <div className="absolute inset-0 aurora-mask" />
                 <div className="relative w-full max-w-sm space-y-4 rounded-2xl glass-panel p-6 text-center">
-                  <div className="text-lg font-bold text-warn">引擎异常</div>
+                  <div className="text-lg font-bold text-warn">{t('app.engineError')}</div>
                   <p className="text-xs leading-relaxed text-ink-dim">
-                    渲染循环里出现未捕获的错误，本局已停止。可以重开一局，或返回主菜单。
+                    {t('app.engineErrorDesc')}
                   </p>
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => controller.restart()}
                       className="flex-1 flex min-h-[44px] items-center justify-center rounded-xl bg-cyber-accent px-4 text-sm font-semibold text-accent-ink hover:brightness-110 active:scale-[0.98] transition-all"
                     >
-                      重新开始
+                      {t('app.restart')}
                     </button>
                     <button
                       onClick={() => controller.toMenu()}
                       className="flex-1 flex min-h-[44px] items-center justify-center rounded-xl border border-edge bg-surface/60 px-4 text-sm font-semibold text-ink hover:bg-surface active:scale-[0.98] transition-colors"
                     >
-                      返回主菜单
+                      {t('app.menu')}
                     </button>
                   </div>
                 </div>

@@ -19,16 +19,18 @@ import { FormEvent, useEffect, useState } from 'react'
 import { controller } from '../controller'
 import { CAMPAIGN_LEVELS, MazeSize } from '../core/constants'
 import { randomSeed } from '../core/rng'
-import { THEMES, VisualTheme } from '../core/themes'
+import { VisualTheme } from '../core/themes'
+import { chapterName, levelName, themeName, themeShortName, useLang, useT } from '../i18n/store'
 import { parseUrlParams, QualitySetting } from '../state/persistence'
 import { useGameStore } from '../state/useGameStore'
 import { AuthorModal } from './AuthorModal'
+import { LangToggle } from './LangToggle'
 import { panelMotion, staggerItem, staggerParent } from './motion'
 
-const SIZES: { key: MazeSize; label: string; desc: string }[] = [
-  { key: 's', label: '小', desc: '9×9' },
-  { key: 'm', label: '中', desc: '15×15' },
-  { key: 'l', label: '大', desc: '21×21' },
+const SIZES: { key: MazeSize; label: 'size.s' | 'size.m' | 'size.l'; desc: string }[] = [
+  { key: 's', label: 'size.s', desc: '9×9' },
+  { key: 'm', label: 'size.m', desc: '15×15' },
+  { key: 'l', label: 'size.l', desc: '21×21' },
 ]
 
 const THEME_LIST: VisualTheme[] = ['cyber', 'aurora', 'light']
@@ -36,6 +38,8 @@ const GHOST =
   'flex min-h-[36px] items-center gap-1.5 rounded-lg px-2.5 text-xs text-ink-dim transition-colors duration-150 hover:bg-surface/60 hover:text-ink'
 
 export function TitleScreen() {
+  const t = useT()
+  const lang = useLang()
   const size = useGameStore((s) => s.size)
   const setSize = useGameStore((s) => s.setSize)
   const shifting = useGameStore((s) => s.shifting)
@@ -100,6 +104,9 @@ export function TitleScreen() {
     >
       <div className="pointer-events-none fixed inset-0 aurora-veil" />
       <div className="relative flex min-h-full flex-col p-5 md:p-6">
+        <div className="pointer-events-auto absolute right-5 top-5 z-20 md:right-6 md:top-6">
+          <LangToggle />
+        </div>
         <div className="max-w-xl space-y-4 pt-4 md:pt-8">
           <motion.div variants={staggerItem} className="flex items-center gap-3">
             {/* 官方专属 3D 游戏徽标：纯净白底、严丝合缝，与浅色全息界面浑然一体 */}
@@ -109,21 +116,23 @@ export function TitleScreen() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-edge/50 bg-surface/40 px-3 py-0.5 font-mono text-[11px] uppercase tracking-widest text-ink-dim">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyber-accent" />
-                CYBERMAZE 3D · 活墙
+                {t('title.badge')}
               </div>
-              <div className="mt-0.5 text-[11px] text-ink-faint">动态流形 3D 解谜 · 图论不变量守护</div>
+              <div className="mt-0.5 text-[11px] text-ink-faint">{t('title.tagline')}</div>
             </div>
           </motion.div>
 
           <motion.h1
             variants={staggerItem}
-            className="text-4xl font-bold leading-[1.08] tracking-tight text-ink md:text-6xl"
+            className={`font-bold leading-[1.08] tracking-tight text-ink ${
+              lang === 'en' ? 'text-3xl md:text-5xl' : 'text-4xl md:text-6xl'
+            }`}
           >
-            活墙
+            {t('title.headline')}
             <span className="mt-1 block tracking-[0.04em]">CYBERMAZE 3D</span>
           </motion.h1>
           <motion.p variants={staggerItem} className="max-w-sm text-sm leading-relaxed text-ink-dim">
-            从第一步到全息王座。墙会呼吸，路线由你重写。
+            {t('title.subtitle')}
           </motion.p>
         </div>
 
@@ -133,31 +142,31 @@ export function TitleScreen() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="font-mono text-[11px] uppercase tracking-widest text-cyber-accent">
-                    {level.chapter} · {String(level.id).padStart(2, '0')}/12
+                    {chapterName(lang, level)} · {String(level.id).padStart(2, '0')}/12
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="text-xl font-bold text-ink">{level.name}</span>
+                    <span className="text-xl font-bold text-ink">{levelName(lang, level)}</span>
                     {/* 主题快捷切换胶囊 */}
                     <div
                       className="inline-flex items-center rounded-lg border border-edge/60 bg-sunken/60 p-0.5"
                       role="radiogroup"
-                      aria-label="选择视觉主题"
+                      aria-label={t('title.themeAria')}
                     >
-                      {THEME_LIST.map((t) => {
-                        const active = theme === t
-                        const label = t === 'cyber' ? '深空' : t === 'aurora' ? '紫电' : '明境'
-                        const dotColor = t === 'cyber' ? '#22d3ee' : t === 'aurora' ? '#c084fc' : '#38bdf8'
+                      {THEME_LIST.map((tItem) => {
+                        const active = theme === tItem
+                        const label = themeShortName(lang, tItem)
+                        const dotColor = tItem === 'cyber' ? '#22d3ee' : tItem === 'aurora' ? '#c084fc' : '#38bdf8'
                         return (
                           <button
-                            key={t}
+                            key={tItem}
                             type="button"
                             role="radio"
                             aria-checked={active}
                             onClick={() => {
-                              setTheme(t)
-                              showToast(`已切换主题: ${THEMES[t].name}`)
+                              setTheme(tItem)
+                              showToast(t('title.themeSwitchToast', { name: themeName(lang, tItem) }))
                             }}
-                            title={`切换至${THEMES[t].name}`}
+                            title={t('title.themeSwitchTitle', { name: themeName(lang, tItem) })}
                             className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium transition-all ${
                               active
                                 ? 'bg-surface text-ink shadow-xs ring-1 ring-edge/80 font-semibold'
@@ -178,25 +187,27 @@ export function TitleScreen() {
                     </div>
                   </div>
                   <div className="mt-1 text-[11px] text-ink-dim">
-                    {level.w}×{level.h} · {level.shifting ? `${level.shiftInterval}s 动态重构` : '静态教学迷宫'}
+                    {level.shifting
+                      ? t('title.levelMetaDynamic', { w: level.w, h: level.h, seconds: level.shiftInterval })
+                      : t('title.levelMetaStatic', { w: level.w, h: level.h })}
                   </div>
                 </div>
                 <div className="shrink-0 rounded-xl glass-inset px-2.5 py-2 text-right">
                   <div className="flex items-center gap-1 text-warn">
                     <Star className="h-3.5 w-3.5 fill-current" />
                     <span className="text-sm font-bold tabular-nums">{totalStars}</span>
-                    <span className="text-[11px] text-ink-faint">/36</span>
+                    <span className="text-[11px] text-ink-faint">{t('title.starsSuffix')}</span>
                   </div>
-                  <div className="mt-0.5 text-[11px] text-ink-faint">已解锁 {campaign.unlocked}/12</div>
+                  <div className="mt-0.5 text-[11px] text-ink-faint">{t('title.unlocked', { n: campaign.unlocked })}</div>
                 </div>
               </div>
 
               <div className="flex items-center justify-between px-0.5 text-[10px] text-ink-faint">
-                <span>星级与解锁进度自动保存在本机</span>
-                <span>清除浏览器数据会重置</span>
+                <span>{t('title.saveNote')}</span>
+                <span>{t('title.resetNote')}</span>
               </div>
 
-              <div className="grid grid-cols-6 gap-1.5" aria-label="关卡选择">
+              <div className="grid grid-cols-6 gap-1.5" aria-label={t('title.levelSelectAria')}>
                 {CAMPAIGN_LEVELS.map((item) => {
                   const locked = item.id > campaign.unlocked
                   const stars = campaign.stars[item.id] ?? 0
@@ -206,7 +217,11 @@ export function TitleScreen() {
                       type="button"
                       disabled={locked}
                       onClick={() => setSelectedLevel(item.id)}
-                      aria-label={locked ? `第 ${item.id} 关未解锁` : `选择第 ${item.id} 关，${stars} 星`}
+                      aria-label={
+                        locked
+                          ? t('title.lockedAria', { n: item.id })
+                          : t('title.selectAria', { n: item.id, stars })
+                      }
                       className={`relative flex h-9 items-center justify-center rounded-lg border text-xs font-semibold transition-all ${
                         selectedLevel === item.id
                           ? 'border-cyber-accent bg-cyber-accent/20 text-cyber-accent'
@@ -228,7 +243,13 @@ export function TitleScreen() {
                 className={`group flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-cyber-accent px-5 text-sm font-semibold text-accent-ink transition-all duration-150 hover:brightness-110 active:scale-[0.98] ${reducedMotion ? '' : 'anim-glow'}`}
               >
                 <Play className="h-4 w-4 fill-current" />
-                <span>{campaign.stars[selectedLevel] ? '再次挑战' : selectedLevel === 1 ? '开始闯关' : `进入第 ${selectedLevel} 关`}</span>
+                <span>
+                  {campaign.stars[selectedLevel]
+                    ? t('title.playAgain')
+                    : selectedLevel === 1
+                      ? t('title.playFirst')
+                      : t('title.playLevel', { n: selectedLevel })}
+                </span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
 
@@ -239,7 +260,7 @@ export function TitleScreen() {
                   className="flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-edge/50 bg-surface/40 px-2 text-xs font-semibold text-ink transition-colors hover:border-edge hover:bg-surface/70"
                 >
                   <CalendarDays className="h-3.5 w-3.5 text-cyber-accent" />
-                  今日挑战
+                  {t('title.daily')}
                 </button>
                 <button
                   type="button"
@@ -247,7 +268,7 @@ export function TitleScreen() {
                   className="flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-edge/50 bg-surface/40 px-2 text-xs font-semibold text-ink transition-colors hover:border-edge hover:bg-surface/70"
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5 text-cyber-accent" />
-                  自由定制
+                  {t('title.custom')}
                 </button>
                 <button
                   type="button"
@@ -255,7 +276,7 @@ export function TitleScreen() {
                   className="flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-edge/50 bg-surface/40 px-2 text-xs font-semibold text-ink transition-colors hover:border-edge hover:bg-surface/70"
                 >
                   <Cpu className="h-3.5 w-3.5 text-ink-dim" />
-                  算法实验室
+                  {t('title.lab')}
                 </button>
               </div>
             </div>
@@ -266,7 +287,7 @@ export function TitleScreen() {
           <div className="flex flex-wrap items-center gap-0.5">
             <button onClick={() => setSoundEnabled(!soundEnabled)} className={GHOST}>
               {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4 text-ink-faint" />}
-              <span>音效 {soundEnabled ? '开' : '关'}</span>
+              <span>{t(soundEnabled ? 'title.soundOn' : 'title.soundOff')}</span>
             </button>
             <button
               onClick={() => {
@@ -275,22 +296,22 @@ export function TitleScreen() {
               }}
               className={GHOST}
             >
-              画质 {quality === 'auto' ? '自动' : quality === 'high' ? '高' : '低'}
+              {t(quality === 'auto' ? 'title.qualityAuto' : quality === 'high' ? 'title.qualityHigh' : 'title.qualityLow')}
             </button>
             <button onClick={toggleTouchControls} className={GHOST}>
               <MonitorSmartphone className="h-4 w-4" />
-              <span>触控 {showTouchControls ? '开' : '关'}</span>
+              <span>{t(showTouchControls ? 'title.touchOn' : 'title.touchOff')}</span>
             </button>
             <button
               onClick={() => setAuthorModalOpen(true)}
               className={GHOST}
-              title="查看作者生态与精选开源项目"
+              title={t('title.authorTitle')}
             >
               <User className="h-4 w-4 text-cyber-accent" />
-              <span>作者：艺杯羹</span>
+              <span>{t('title.author')}</span>
             </button>
           </div>
-          <div className="pb-1.5 text-[11px] text-ink-faint">v1.1</div>
+          <div className="pb-1.5 text-[11px] text-ink-faint">{t('title.version')}</div>
         </motion.div>
       </div>
 
@@ -313,14 +334,14 @@ export function TitleScreen() {
               {/* 弹窗头部 */}
               <div className="flex items-center justify-between border-b border-edge/40 pb-3">
                 <div>
-                  <h2 className="text-xl font-bold text-ink">自由定制迷宫</h2>
-                  <p className="mt-0.5 text-[11px] text-ink-faint">自由配置迷宫规格、动态重构与专属种子</p>
+                  <h2 className="text-xl font-bold text-ink">{t('title.customTitle')}</h2>
+                  <p className="mt-0.5 text-[11px] text-ink-faint">{t('title.customDesc')}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setCustomModalOpen(false)}
                   className="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-sunken hover:text-ink"
-                  aria-label="关闭"
+                  aria-label={t('title.customModalAria')}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -328,7 +349,7 @@ export function TitleScreen() {
 
               {/* 迷宫规模选择 */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-ink-dim">迷宫规模</label>
+                <label className="text-xs font-semibold text-ink-dim">{t('title.mazeSize')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {SIZES.map((item) => (
                     <button
@@ -341,7 +362,7 @@ export function TitleScreen() {
                           : 'border-edge/50 bg-sunken/40 text-ink-dim hover:border-edge hover:text-ink'
                       }`}
                     >
-                      <span className="text-sm font-bold">{item.label}</span>
+                      <span className="text-sm font-bold">{t(item.label)}</span>
                       <span className="mt-0.5 text-[11px] opacity-75">{item.desc}</span>
                     </button>
                   ))}
@@ -351,8 +372,8 @@ export function TitleScreen() {
               {/* 动力学重构开关 */}
               <div className="flex items-center justify-between rounded-xl glass-inset px-4 py-3">
                 <div>
-                  <div className="text-xs font-semibold text-ink">动力学墙体重排</div>
-                  <div className="text-[11px] text-ink-faint">每 15 秒基于生成树边置换重组路径</div>
+                  <div className="text-xs font-semibold text-ink">{t('title.shiftingTitle')}</div>
+                  <div className="text-[11px] text-ink-faint">{t('title.shiftingDesc')}</div>
                 </div>
                 <button
                   type="button"
@@ -373,13 +394,13 @@ export function TitleScreen() {
 
               {/* 迷宫种子 */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-ink-dim">自定义种子</label>
+                <label className="text-xs font-semibold text-ink-dim">{t('title.seed')}</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={seedInput}
                     onChange={(e) => setSeedInput(e.target.value.slice(0, 32))}
-                    placeholder="留空则随机生成"
+                    placeholder={t('title.seedPlaceholder')}
                     className="h-11 min-w-0 flex-1 rounded-xl border border-edge/50 bg-sunken/60 px-3 font-mono text-xs text-ink outline-none placeholder:text-ink-faint focus:border-cyber-accent"
                   />
                   <button
@@ -387,9 +408,9 @@ export function TitleScreen() {
                     onClick={() => {
                       const seed = randomSeed()
                       setSeedInput(seed)
-                      showToast(`已生成随机种子: ${seed}`)
+                      showToast(t('title.seedRandomToast', { seed }))
                     }}
-                    title="生成随机种子"
+                    title={t('title.seedRandomTitle')}
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-edge/50 bg-surface/50 text-ink-dim hover:border-edge hover:text-ink"
                   >
                     <Dices className="h-4 w-4" />
@@ -399,7 +420,7 @@ export function TitleScreen() {
 
               {/* 视觉主题预设 */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-ink-dim">视觉色彩主题</label>
+                <label className="text-xs font-semibold text-ink-dim">{t('title.themeLabel')}</label>
                 <div className="grid grid-cols-3 gap-1.5 rounded-xl border border-edge/40 bg-sunken/40 p-1">
                   {THEME_LIST.map((item) => (
                     <button
@@ -413,7 +434,7 @@ export function TitleScreen() {
                       }`}
                     >
                       {theme === item && <Check className="h-3 w-3" />}
-                      {THEMES[item].name}
+                      {themeName(lang, item)}
                     </button>
                   ))}
                 </div>
@@ -427,7 +448,7 @@ export function TitleScreen() {
                   className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-cyber-accent px-5 text-sm font-semibold text-accent-ink transition-all hover:brightness-110 active:scale-[0.98]"
                 >
                   <Play className="h-4 w-4 fill-current" />
-                  <span>启动自由迷宫</span>
+                  <span>{t('title.startCustom')}</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>

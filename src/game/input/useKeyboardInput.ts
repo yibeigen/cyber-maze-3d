@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { controller } from '../controller'
 import { Dir, screenToWorldDir } from '../core/grid'
+import { translate } from '../i18n/store'
 import { CameraMode } from '../state/persistence'
 import { useGameStore } from '../state/useGameStore'
 
@@ -77,15 +78,15 @@ export function useKeyboardInput(): void {
           break
         case 'KeyF': {
           const result = engine.scan()
-          if (result === 'busy') store.showToast('变形或扫描进行中，稍后再试', 'warn')
-          if (result === 'no-charges') store.showToast('本局扫描已用完')
+          if (result === 'busy') store.showToast(translate('toast.scanBusy'), 'warn')
+          if (result === 'no-charges') store.showToast(translate('toast.scanEmpty'))
           break
         }
         case 'KeyG': {
           const result = engine.forceShift()
-          if (result === 'busy') store.showToast('变形进行中，稍等一下', 'warn')
-          if (result === 'no-charges') store.showToast('主动重构次数已用完')
-          if (result === 'not-allowed') store.showToast('静态迷宫无法主动重构')
+          if (result === 'busy') store.showToast(translate('toast.forceBusy'), 'warn')
+          if (result === 'no-charges') store.showToast(translate('toast.forceEmpty'))
+          if (result === 'not-allowed') store.showToast(translate('toast.forceNotAllowed'))
           break
         }
         case 'KeyQ':
@@ -97,7 +98,7 @@ export function useKeyboardInput(): void {
         case 'KeyV':
           clearMovement()
           store.toggleCameraMode()
-          store.showToast(store.cameraMode === 'third' ? '第一人称 · WASD 移动，A/D 转向' : '已切换第三人称')
+          store.showToast(store.cameraMode === 'third' ? translate('toast.cameraFirst') : translate('toast.cameraThird'))
           break
         case 'KeyH':
           store.toggleCinematic()
@@ -121,7 +122,7 @@ export function useKeyboardInput(): void {
           break
         case 'KeyM':
           store.setSoundEnabled(!store.soundEnabled)
-          store.showToast(store.soundEnabled ? '音效已关闭' : '音效已开启')
+          store.showToast(store.soundEnabled ? translate('toast.soundOff') : translate('toast.soundOn'))
           break
       }
     }

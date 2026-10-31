@@ -12,6 +12,7 @@ import {
 import { memo, useCallback, useRef, useState } from 'react'
 import { controller } from '../controller'
 import { Dir, screenToWorldDir } from '../core/grid'
+import { useT } from '../i18n/store'
 import { useGameStore } from '../state/useGameStore'
 
 const HOLD_RUN_DELAY = 220
@@ -37,6 +38,7 @@ function DPadButton({ dir, label, icon: Icon, className, activeDir }: {
 }
 
 export const TouchController = memo(function TouchController() {
+  const t = useT()
   const yawStep = useGameStore((s) => s.yawStep)
   const isSurveying = useGameStore((s) => s.isSurveying)
   const setSurveying = useGameStore((s) => s.setSurveying)
@@ -110,15 +112,15 @@ export const TouchController = memo(function TouchController() {
 
   const handleScan = () => {
     const result = controller.getEngine()?.scan()
-    if (result === 'busy') showToast('变形或扫描进行中，稍后再试', 'warn')
-    if (result === 'no-charges') showToast('本局扫描已用完')
+    if (result === 'busy') showToast(t('toast.scanBusy'), 'warn')
+    if (result === 'no-charges') showToast(t('toast.scanEmpty'))
   }
 
   const handleForceShift = () => {
     const result = controller.getEngine()?.forceShift()
-    if (result === 'busy') showToast('变形进行中，稍等一下', 'warn')
-    if (result === 'no-charges') showToast('主动重构次数已用完')
-    if (result === 'not-allowed') showToast('静态迷宫无法主动重构')
+    if (result === 'busy') showToast(t('toast.forceBusy'), 'warn')
+    if (result === 'no-charges') showToast(t('toast.forceEmpty'))
+    if (result === 'not-allowed') showToast(t('toast.forceNotAllowed'))
   }
 
   if (!showTouchControls) return null
@@ -141,29 +143,29 @@ export const TouchController = memo(function TouchController() {
         className="pointer-events-auto relative flex h-36 w-36 touch-none items-center justify-center md:h-40 md:w-40"
       >
         <div className="absolute inset-0 rounded-full border border-edge/40 bg-surface/40 backdrop-blur-sm" />
-        <DPadButton dir={0} label={cameraMode === 'first' ? '前进' : '向上移动'} icon={ChevronUp} activeDir={activeDir} className="left-1/2 top-1 h-11 w-11 -translate-x-1/2 rounded-b-md rounded-t-xl md:h-12 md:w-12" />
-        <DPadButton dir={1} label={cameraMode === 'first' ? '向右转' : '向右移动'} icon={ChevronRight} activeDir={activeDir} className="right-1 top-1/2 h-11 w-11 -translate-y-1/2 rounded-l-md rounded-r-xl md:h-12 md:w-12" />
-        <DPadButton dir={2} label={cameraMode === 'first' ? '后退' : '向下移动'} icon={ChevronDown} activeDir={activeDir} className="bottom-1 left-1/2 h-11 w-11 -translate-x-1/2 rounded-b-xl rounded-t-md md:h-12 md:w-12" />
-        <DPadButton dir={3} label={cameraMode === 'first' ? '向左转' : '向左移动'} icon={ChevronLeft} activeDir={activeDir} className="left-1 top-1/2 h-11 w-11 -translate-y-1/2 rounded-l-xl rounded-r-md md:h-12 md:w-12" />
+        <DPadButton dir={0} label={cameraMode === 'first' ? t('touch.forward') : t('touch.moveUp')} icon={ChevronUp} activeDir={activeDir} className="left-1/2 top-1 h-11 w-11 -translate-x-1/2 rounded-b-md rounded-t-xl md:h-12 md:w-12" />
+        <DPadButton dir={1} label={cameraMode === 'first' ? t('touch.turnRight') : t('touch.moveRight')} icon={ChevronRight} activeDir={activeDir} className="right-1 top-1/2 h-11 w-11 -translate-y-1/2 rounded-l-md rounded-r-xl md:h-12 md:w-12" />
+        <DPadButton dir={2} label={cameraMode === 'first' ? t('touch.back') : t('touch.moveDown')} icon={ChevronDown} activeDir={activeDir} className="bottom-1 left-1/2 h-11 w-11 -translate-x-1/2 rounded-b-xl rounded-t-md md:h-12 md:w-12" />
+        <DPadButton dir={3} label={cameraMode === 'first' ? t('touch.turnLeft') : t('touch.moveLeft')} icon={ChevronLeft} activeDir={activeDir} className="left-1 top-1/2 h-11 w-11 -translate-y-1/2 rounded-l-xl rounded-r-md md:h-12 md:w-12" />
         <div className="pointer-events-none z-10 text-ink-faint"><Compass className="h-4 w-4 text-ink-dim" /></div>
       </div>
 
       <div className="pointer-events-auto flex flex-col items-end gap-2">
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => { controller.getEngine()?.clearInput(); rotateYaw(1) }} className="flex h-11 w-11 items-center justify-center rounded-xl border border-edge/60 bg-surface/70 text-ink-dim backdrop-blur-md active:scale-95 md:h-12 md:w-12" title="顺时针转视角 90°">
+          <button type="button" onClick={() => { controller.getEngine()?.clearInput(); rotateYaw(1) }} className="flex h-11 w-11 items-center justify-center rounded-xl border border-edge/60 bg-surface/70 text-ink-dim backdrop-blur-md active:scale-95 md:h-12 md:w-12" title={t('touch.rotateTitle')}>
             <RotateCw className="h-4 w-4" />
           </button>
-          <button type="button" onClick={() => { controller.getEngine()?.clearInput(); toggleCameraMode() }} className={`flex h-11 w-11 items-center justify-center rounded-xl border backdrop-blur-md active:scale-95 ${cameraMode === 'first' ? 'border-cyber-accent bg-cyber-accent/15 text-cyber-accent' : 'border-edge/60 bg-surface/70 text-ink-dim'}`} title="切换第一 / 第三人称">
+          <button type="button" onClick={() => { controller.getEngine()?.clearInput(); toggleCameraMode() }} className={`flex h-11 w-11 items-center justify-center rounded-xl border backdrop-blur-md active:scale-95 ${cameraMode === 'first' ? 'border-cyber-accent bg-cyber-accent/15 text-cyber-accent' : 'border-edge/60 bg-surface/70 text-ink-dim'}`} title={t('touch.cameraTitle')}>
             <Compass className="h-4 w-4" />
           </button>
-          <button type="button" onClick={handleScan} disabled={scansRemaining <= 0} className={`relative flex h-11 w-11 items-center justify-center rounded-xl border active:scale-95 ${scansRemaining > 0 ? 'border-cyber-accent/70 bg-cyber-accent/15 text-cyber-accent' : 'border-edge/50 bg-surface/50 text-ink-faint opacity-40'}`} title="扫描最优逃生路径">
+          <button type="button" onClick={handleScan} disabled={scansRemaining <= 0} className={`relative flex h-11 w-11 items-center justify-center rounded-xl border active:scale-95 ${scansRemaining > 0 ? 'border-cyber-accent/70 bg-cyber-accent/15 text-cyber-accent' : 'border-edge/50 bg-surface/50 text-ink-faint opacity-40'}`} title={t('touch.scanTitle')}>
             <Radar className="h-4 w-4" />
             <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full border border-edge/50 bg-sunken px-1 text-[11px] font-semibold text-ink">
               {Number.isFinite(scansRemaining) ? scansRemaining : '∞'}
             </span>
           </button>
           {shifting && (
-            <button type="button" onClick={handleForceShift} disabled={forceCharges <= 0} className={`relative flex h-11 w-11 items-center justify-center rounded-xl border active:scale-95 ${forceCharges > 0 ? 'border-warn/60 bg-warn/15 text-warn' : 'border-edge/50 bg-surface/50 text-ink-faint opacity-40'}`} title="主动触发迷宫重构">
+            <button type="button" onClick={handleForceShift} disabled={forceCharges <= 0} className={`relative flex h-11 w-11 items-center justify-center rounded-xl border active:scale-95 ${forceCharges > 0 ? 'border-warn/60 bg-warn/15 text-warn' : 'border-edge/50 bg-surface/50 text-ink-faint opacity-40'}`} title={t('touch.forceTitle')}>
               <Zap className="h-4 w-4" />
               <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full border border-edge/50 bg-sunken px-1 text-[11px] font-semibold text-ink">{forceCharges}</span>
             </button>
@@ -177,7 +179,7 @@ export const TouchController = memo(function TouchController() {
           onPointerCancel={() => { setSurveying(false); controller.getEngine()?.setSurvey(false) }}
           className={`flex h-11 min-w-[124px] touch-none items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-semibold active:scale-95 ${isSurveying ? 'border-cyber-accent bg-cyber-accent text-accent-ink' : 'border-edge/60 bg-surface/85 text-ink backdrop-blur-md'}`}
         >
-          <Eye className="h-4 w-4" /><span>俯瞰全景</span>
+          <Eye className="h-4 w-4" /><span>{t('touch.survey')}</span>
         </button>
       </div>
     </div>

@@ -16,12 +16,14 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 import { controller } from '../controller'
 import { SIZE_CONFIGS } from '../core/constants'
 import { roomToWorld } from '../core/grid'
+import { levelName, useLang, useT } from '../i18n/store'
 import { buildShareUrl, copyToClipboard } from '../state/persistence'
 import { useGameStore } from '../state/useGameStore'
 import { LiveNumbers } from './LiveNumbers'
 import { TouchController } from './TouchController'
 
 function DistanceReadout() {
+  const t = useT()
   const textRef = useRef<HTMLSpanElement>(null)
   const barRef = useRef<HTMLDivElement>(null)
   const previousRef = useRef<number | null>(null)
@@ -35,7 +37,7 @@ function DistanceReadout() {
         const engine = controller.getEngine()
         if (engine && textRef.current && barRef.current) {
           const distance = engine.remainingDistance
-          textRef.current.textContent = distance >= 0 ? `距 ${distance}` : '距 —'
+          textRef.current.textContent = distance >= 0 ? t('hud.distance', { n: distance }) : t('hud.distanceUnknown')
           const initial = Math.max(1, engine.initialOptimalMoves)
           const progress = distance >= 0 ? Math.min(1, Math.max(0, 1 - distance / initial)) : 0
           barRef.current.style.transform = `scaleX(${progress})`
@@ -48,12 +50,14 @@ function DistanceReadout() {
     }
     animId = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(animId)
-  }, [])
+  }, [t])
 
   return (
     <div className="w-[76px] space-y-1">
-      <span ref={textRef} className="block text-[11px] leading-none text-ink-dim tabular-nums">距 --</span>
-      <div className="h-[3px] overflow-hidden rounded-full bg-edge/35" title="逃脱进度">
+      <span ref={textRef} className="block text-[11px] leading-none text-ink-dim tabular-nums">
+        {t('hud.distanceUnknown')}
+      </span>
+      <div className="h-[3px] overflow-hidden rounded-full bg-edge/35" title={t('hud.progressTitle')}>
         <div ref={barRef} className="h-full origin-left scale-x-0 rounded-full bg-cyber-accent transition-transform duration-200" />
       </div>
     </div>
@@ -61,6 +65,7 @@ function DistanceReadout() {
 }
 
 function ShiftCountdown() {
+  const t = useT()
   const [info, setInfo] = useState<{ seconds: number; isWarning: boolean; isMotion: boolean } | null>(null)
 
   useEffect(() => {
@@ -85,7 +90,7 @@ function ShiftCountdown() {
   const tone = isWarning ? 'text-warn' : isMotion ? 'text-ok' : 'text-cyber-accent'
 
   return (
-    <div className="glass-panel flex items-center gap-2 rounded-xl px-2.5 py-1.5" title="墙体自动重构倒计时">
+    <div className="glass-panel flex items-center gap-2 rounded-xl px-2.5 py-1.5" title={t('hud.shiftTitle')}>
       <svg className="h-5 w-5 -rotate-90" viewBox="0 0 32 32">
         <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" className="text-edge/35" strokeWidth="3.5" />
         <circle
@@ -95,7 +100,11 @@ function ShiftCountdown() {
         />
       </svg>
       <span className={`text-[11px] font-semibold leading-none tabular-nums ${tone}`}>
-        {isWarning ? '预警' : isMotion ? '重排中' : `${Math.ceil(seconds)}s 后重构`}
+        {isWarning
+          ? t('hud.shiftWarning')
+          : isMotion
+            ? t('hud.shifting')
+            : t('hud.shiftIn', { n: Math.ceil(seconds) })}
       </span>
     </div>
   )
@@ -151,6 +160,7 @@ function DockButton({
 }
 
 function FirstPersonCompass() {
+  const t = useT()
   const markerRef = useRef<HTMLDivElement>(null)
   const labelRef = useRef<HTMLSpanElement>(null)
 
@@ -165,17 +175,19 @@ function FirstPersonCompass() {
         const current = useGameStore.getState().yawStep * Math.PI / 2
         const relative = Math.atan2(Math.sin(target - current), Math.cos(target - current))
         markerRef.current.style.left = `${50 + relative / Math.PI * 48}%`
-        if (labelRef.current) labelRef.current.textContent = Math.abs(relative) < 0.18 ? '信标在正前方' : '出口方位'
+        if (labelRef.current) {
+          labelRef.current.textContent = Math.abs(relative) < 0.18 ? t('hud.beaconAhead') : t('hud.exitBearing')
+        }
       }
       animId = requestAnimationFrame(update)
     }
     animId = requestAnimationFrame(update)
     return () => cancelAnimationFrame(animId)
-  }, [])
+  }, [t])
 
   return (
     <div className="absolute left-1/2 top-4 w-[240px] max-w-[42vw] -translate-x-1/2 rounded-xl glass-panel px-4 py-2 text-center">
-      <span ref={labelRef} className="text-[11px] text-ink-dim">出口方位</span>
+      <span ref={labelRef} className="text-[11px] text-ink-dim">{t('hud.exitBearing')}</span>
       <div className="relative mt-1 flex items-center justify-between font-mono text-[11px] text-ink-faint">
         <span>W</span><span>N</span><span>E</span><span>S</span>
         <div ref={markerRef} className="absolute -bottom-1 h-1.5 w-1.5 -translate-x-1/2 rotate-45 bg-[#f472b6] shadow-[0_0_8px_#f472b6]" />
@@ -187,6 +199,8 @@ function FirstPersonCompass() {
 const KEY_CAP = 'rounded-md border border-edge/50 bg-sunken/70 px-1.5 py-0.5 font-mono text-[11px] text-ink'
 
 export function HUD() {
+  const t = useT()
+  const lang = useLang()
   const activeSeed = useGameStore((s) => s.activeSeed)
   const size = useGameStore((s) => s.size)
   const shifting = useGameStore((s) => s.shifting)
@@ -228,20 +242,20 @@ export function HUD() {
 
   const handleCopyLink = async () => {
     const ok = await copyToClipboard(buildShareUrl(size, shifting, activeSeed, activeLevel?.id))
-    showToast(ok ? '已复制迷宫分享链接' : '链接复制失败，请手动复制', ok ? 'success' : 'warn')
+    showToast(ok ? t('hud.copyToast') : t('hud.copyFail'), ok ? 'success' : 'warn')
   }
 
   const handleScan = () => {
     const result = controller.getEngine()?.scan()
-    if (result === 'busy') showToast('变形或扫描进行中，稍后再试', 'warn')
-    if (result === 'no-charges') showToast('本局扫描已用完')
+    if (result === 'busy') showToast(t('hud.scanBusy'), 'warn')
+    if (result === 'no-charges') showToast(t('hud.scanEmpty'))
   }
 
   const handleForceShift = () => {
     const result = controller.getEngine()?.forceShift()
-    if (result === 'busy') showToast('变形进行中，稍等一下', 'warn')
-    if (result === 'no-charges') showToast('主动重构次数已用完')
-    if (result === 'not-allowed') showToast('静态迷宫无法主动重构')
+    if (result === 'busy') showToast(t('hud.forceBusy'), 'warn')
+    if (result === 'no-charges') showToast(t('hud.forceEmpty'))
+    if (result === 'not-allowed') showToast(t('hud.forceNotAllowed'))
   }
 
   const maxScans = activeLevel?.scanCharges ?? SIZE_CONFIGS[size].scanCharges
@@ -249,14 +263,14 @@ export function HUD() {
   const engine = controller.getEngine()
   const mazeLabel = engine ? `${engine.maze.w}×${engine.maze.h}` : SIZE_CONFIGS[size].w
   const taskTitle = tutorial === 'move'
-    ? '第 1 课 · 抵达粉色信标'
+    ? t('hud.taskMoveTitle')
     : tutorial === 'scan'
-      ? '第 2 课 · 召唤算法光轨'
+      ? t('hud.taskScanTitle')
       : tutorial === 'shift'
-        ? '第 3 课 · 读懂矩阵呼吸'
+        ? t('hud.taskShiftTitle')
         : activeLevel
-          ? `第 ${activeLevel.id} 关 · ${activeLevel.name}`
-          : mode === 'daily' ? '今日挑战' : '抵达粉色信标'
+          ? t('hud.taskLevelTitle', { n: activeLevel.id, name: levelName(lang, activeLevel) })
+          : mode === 'daily' ? t('hud.taskDaily') : t('hud.taskArrive')
 
   const taskCard = (
     <div className="pointer-events-auto w-[246px] max-w-[68vw] rounded-xl glass-panel px-3 py-2">
@@ -267,15 +281,15 @@ export function HUD() {
       </button>
       {taskExpanded && (
         <div className="mt-2 space-y-1.5 text-[11px] text-ink-dim">
-          {tutorial === 'move' && <p className="leading-relaxed">按 WASD 或方向键移动。走过的地砖会留下微光，抵达信标即可完成第一课。</p>}
-          {tutorial === 'scan' && <p className="leading-relaxed">本关扫描不限次数。按 F，沿青色最优光轨前进；也可以按住空格俯瞰全图。</p>}
-          {tutorial === 'shift' && <p className="leading-relaxed">琥珀墙将升起，翡翠墙将降下。按 G 可主动重构附近墙体，试试让迷宫为你让路。</p>}
+          {tutorial === 'move' && <p className="leading-relaxed">{t('hud.tutorialMove')}</p>}
+          {tutorial === 'scan' && <p className="leading-relaxed">{t('hud.tutorialScan')}</p>}
+          {tutorial === 'shift' && <p className="leading-relaxed">{t('hud.tutorialShift')}</p>}
           {!tutorial && (
             <>
-              <div className="flex items-center justify-between gap-3"><span>{cameraMode === 'first' ? '前进 / 转向' : '移动'}</span><kbd className={KEY_CAP}>{cameraMode === 'first' ? 'W / A D' : 'WASD'}</kbd></div>
-              <div className="flex items-center justify-between gap-3"><span>扫描最优路线</span><kbd className={KEY_CAP}>F</kbd></div>
-              {shifting && <div className="flex items-center justify-between gap-3"><span>主动重构墙体</span><kbd className={KEY_CAP}>G</kbd></div>}
-              <div className="flex items-center justify-between gap-3 text-ink-faint"><span>俯瞰 / 切换视角</span><span className="flex gap-1"><kbd className={KEY_CAP}>空格</kbd><kbd className={KEY_CAP}>V</kbd></span></div>
+              <div className="flex items-center justify-between gap-3"><span>{t(cameraMode === 'first' ? 'hud.controlsForwardTurn' : 'hud.controlsMove')}</span><kbd className={KEY_CAP}>{cameraMode === 'first' ? 'W / A D' : 'WASD'}</kbd></div>
+              <div className="flex items-center justify-between gap-3"><span>{t('hud.controlsScan')}</span><kbd className={KEY_CAP}>F</kbd></div>
+              {shifting && <div className="flex items-center justify-between gap-3"><span>{t('hud.controlsForce')}</span><kbd className={KEY_CAP}>G</kbd></div>}
+              <div className="flex items-center justify-between gap-3 text-ink-faint"><span>{t('hud.controlsSurvey')}</span><span className="flex gap-1"><kbd className={KEY_CAP}>{t('key.space')}</kbd><kbd className={KEY_CAP}>V</kbd></span></div>
             </>
           )}
         </div>
@@ -289,7 +303,7 @@ export function HUD() {
         <div className="flex w-full flex-col items-start gap-2">
           <div className="flex w-full items-start justify-between gap-2">
             <div className="flex min-w-0 flex-1 flex-col items-start">
-              <button onClick={handleCopyLink} title="点击复制种子链接" className="pointer-events-auto flex max-w-full min-w-0 items-center gap-2 rounded-xl glass-panel px-2.5 py-2 text-xs font-semibold text-ink hover:border-edge">
+              <button onClick={handleCopyLink} title={t('hud.copyTitle')} className="pointer-events-auto flex max-w-full min-w-0 items-center gap-2 rounded-xl glass-panel px-2.5 py-2 text-xs font-semibold text-ink hover:border-edge">
                 <span className="hidden truncate font-mono sm:inline">#{activeSeed}</span>
                 <span className="shrink-0 rounded-md bg-sunken/80 px-1.5 py-0.5 text-[11px] text-ink-dim tabular-nums">{mazeLabel}</span>
                 <Copy className="h-3.5 w-3.5 shrink-0 text-ink-faint" />
@@ -299,17 +313,17 @@ export function HUD() {
             <div className="flex shrink-0 flex-col items-end gap-1.5">
               <div className="pointer-events-auto flex items-center gap-2 rounded-xl glass-panel px-2 py-1.5 md:gap-3 md:px-3 md:py-2">
                 <div className="text-right">
-                  <div className="mb-0.5 text-[11px] leading-none text-ink-faint">{phase === 'ready' ? '就绪' : '用时'}</div>
+                  <div className="mb-0.5 text-[11px] leading-none text-ink-faint">{t(phase === 'ready' ? 'hud.ready' : 'hud.time')}</div>
                   <LiveNumbers className="text-lg font-semibold leading-none tracking-tight text-ink tabular-nums md:text-2xl" />
                 </div>
                 <div className="h-8 w-px bg-edge/40" />
                 <div className="space-y-1.5 text-[11px] leading-none">
-                  <span className="block text-ink-dim">步数 <span className="font-semibold text-ink tabular-nums">{moves}</span></span>
+                  <span className="block text-ink-dim">{t('hud.moves')} <span className="font-semibold text-ink tabular-nums">{moves}</span></span>
                   <DistanceReadout />
                 </div>
                 <button
                   onClick={() => controller.getEngine()?.pause()}
-                  title="暂停游戏 (Esc / P)"
+                  title={t('hud.pauseTitle')}
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-edge/40 text-ink-dim hover:border-edge hover:text-ink md:h-9 md:w-9"
                 >
                   <Pause className="h-4 w-4" />
@@ -327,33 +341,37 @@ export function HUD() {
           <div className="flex flex-wrap items-end justify-between gap-2">
             {taskCard}
             <div className="pointer-events-auto flex w-full flex-wrap items-center justify-end gap-1 rounded-2xl glass-panel p-1.5 md:w-auto md:flex-nowrap md:gap-1.5">
-              <DockButton icon={<RotateCw className="h-4 w-4" />} label="旋转" keyHint="E" title="旋转视角 90° (E)" onClick={() => { controller.getEngine()?.clearInput(); rotateYaw(1) }} />
+              <DockButton icon={<RotateCw className="h-4 w-4" />} label={t('dock.rotate')} keyHint="E" title={t('dock.rotateTitle')} onClick={() => { controller.getEngine()?.clearInput(); rotateYaw(1) }} />
               <DockButton
-                icon={<Eye className="h-4 w-4" />} label="俯瞰" keyHint="空格" title="按住俯瞰全图 (空格)" active={isSurveying}
+                icon={<Eye className="h-4 w-4" />} label={t('dock.survey')} keyHint={t('key.space')} title={t('dock.surveyTitle')} active={isSurveying}
                 onPointerDown={(e) => { e.preventDefault(); setSurveying(true); controller.getEngine()?.setSurvey(true) }}
                 onPointerUp={(e) => { e.preventDefault(); setSurveying(false); controller.getEngine()?.setSurvey(false) }}
               />
               <DockButton
-                icon={<Radar className="h-4 w-4" />} label="扫描" keyHint="F"
-                title={`扫描最优路线 (F) · ${Number.isFinite(scansRemaining) ? `剩 ${scansRemaining} 次` : '不限次数'}`}
+                icon={<Radar className="h-4 w-4" />} label={t('dock.scan')} keyHint="F"
+                title={
+                  Number.isFinite(scansRemaining)
+                    ? t('hud.scanTitleRemaining', { n: scansRemaining })
+                    : t('hud.scanTitleUnlimited')
+                }
                 onClick={handleScan} disabled={scansRemaining <= 0} pips={{ total: maxScans, left: scansRemaining }}
               />
               {shifting && (
                 <DockButton
-                  icon={<Zap className="h-4 w-4" />} label="重构" keyHint="G" title={`主动重构附近墙体 (G) · 剩 ${forceCharges} 次`}
+                  icon={<Zap className="h-4 w-4" />} label={t('dock.force')} keyHint="G" title={t('hud.forceTitle', { n: forceCharges })}
                   onClick={handleForceShift} disabled={forceCharges <= 0} pips={{ total: maxForce, left: forceCharges }}
                 />
               )}
               <DockButton
-                icon={<Compass className="h-4 w-4" />} label="视角" keyHint="V" title="切换第三 / 第一人称 (V)" active={cameraMode === 'first'}
+                icon={<Compass className="h-4 w-4" />} label={t('dock.camera')} keyHint="V" title={t('dock.cameraTitle')} active={cameraMode === 'first'}
                 onClick={() => {
                   controller.getEngine()?.clearInput()
                   toggleCameraMode()
-                  showToast(cameraMode === 'third' ? '第一人称 · 空格俯瞰，V 返回' : '已切换第三人称')
+                  showToast(t(cameraMode === 'third' ? 'dock.cameraFirstToast' : 'dock.cameraThirdToast'))
                 }}
               />
-              <DockButton icon={<Film className="h-4 w-4" />} label="电影" keyHint="H" title="电影模式 (H)" onClick={toggleCinematic} />
-              <DockButton icon={<Gamepad2 className="h-4 w-4" />} label="触控" title="显示触控手柄" onClick={toggleTouchControls} />
+              <DockButton icon={<Film className="h-4 w-4" />} label={t('dock.cinematic')} keyHint="H" title={t('dock.cinematicTitle')} onClick={toggleCinematic} />
+              <DockButton icon={<Gamepad2 className="h-4 w-4" />} label={t('dock.touch')} title={t('dock.touchTitle')} onClick={toggleTouchControls} />
             </div>
           </div>
         )}

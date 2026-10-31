@@ -2,6 +2,7 @@ import { PerformanceMonitor } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { ReactNode, useEffect, useState } from 'react'
 import { THEMES } from '../core/themes'
+import { useT } from '../i18n/store'
 import { useGameStore } from '../state/useGameStore'
 
 interface GameCanvasProps {
@@ -22,6 +23,7 @@ function checkWebGLSupport(): boolean {
 }
 
 export function GameCanvas({ children }: GameCanvasProps) {
+  const t = useT()
   // 首帧就判掉 WebGL 支持，避免先挂载 Canvas 再报错
   const [hasWebGL] = useState(() => checkWebGLSupport())
   const [contextLost, setContextLost] = useState(false)
@@ -42,9 +44,9 @@ export function GameCanvas({ children }: GameCanvasProps) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-sunken p-6 text-center font-sans text-ink">
         <div className="max-w-md space-y-4 rounded-xl border border-warn/30 bg-surface p-6">
-          <div className="text-lg font-bold text-warn">⚠️ WebGL 不可用</div>
+          <div className="text-lg font-bold text-warn">{t('canvas.webglTitle')}</div>
           <p className="text-sm text-ink-dim">
-            当前浏览器环境无法启用硬件加速 WebGL 渲染，请尝试开启浏览器硬件加速或更换现代浏览器。
+            {t('canvas.webglDesc')}
           </p>
         </div>
       </div>
@@ -55,13 +57,13 @@ export function GameCanvas({ children }: GameCanvasProps) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-sunken p-6 text-center font-sans text-ink">
         <div className="max-w-md space-y-4 rounded-xl border border-warn/40 bg-surface p-6">
-          <div className="text-lg font-bold text-warn">⚠️ 渲染器已中断</div>
-          <p className="text-sm text-ink-dim">WebGL 上下文丢失，请重新加载页面。</p>
+          <div className="text-lg font-bold text-warn">{t('canvas.lostTitle')}</div>
+          <p className="text-sm text-ink-dim">{t('canvas.lostDesc')}</p>
           <button
             onClick={() => window.location.reload()}
             className="rounded-xl bg-cyber-accent px-5 py-2.5 text-sm font-semibold text-accent-ink transition-all hover:brightness-110 active:scale-[0.98]"
           >
-            重新加载
+            {t('canvas.reload')}
           </button>
         </div>
       </div>

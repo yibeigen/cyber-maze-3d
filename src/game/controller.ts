@@ -3,6 +3,7 @@ import { CAMPAIGN_LEVELS, GameMode, getCampaignLevel, MazeSize } from './core/co
 import { dailySeed, randomSeed, sanitizeSeed } from './core/rng'
 import { GameEngine } from './engine/GameEngine'
 import { RunConfig } from './engine/types'
+import { translate } from './i18n/store'
 import { useGameStore } from './state/useGameStore'
 
 let runIdCounter = 0
@@ -74,7 +75,7 @@ class GameController {
           this.bumpTimes = this.bumpTimes.filter((time) => now - time < 3000)
           this.bumpTimes.push(now)
           if (this.bumpTimes.length === 2 && newEngine.forceChargesRemaining > 0) {
-            store.showToast('被堵住了？按 G 重构附近墙体', 'info')
+            store.showToast(translate('toast.blockedHint'), 'info')
           }
           break
         }

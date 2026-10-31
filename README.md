@@ -1,6 +1,8 @@
 <!-- CyberMaze 3D · 活墙 官方开源项目文档 -->
 <div align="center">
 
+  <p><b>简体中文</b> · <a href="README.en.md">English</a></p>
+
   <img src="public/logo.jpg" alt="CyberMaze 3D Logo" width="180" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.12);" />
 
   # CyberMaze 3D · 活墙
@@ -23,7 +25,7 @@
   </p>
 
   <p><b>「突破传统迷宫的静止边界，体验动力学拓扑重组与三维光影盛宴。」</b><br>
-  无需安装、无需注册，打开浏览器即可即刻启航畅玩。</p>
+  无需安装、无需注册，打开浏览器即可即刻启航畅玩。游戏界面支持中英文切换，默认中文。</p>
 
   | 🎮 在线秒玩入口 | 💻 源码开源仓库 | 💬 交流与获取更多工具 |
   | :---: | :---: | :---: |

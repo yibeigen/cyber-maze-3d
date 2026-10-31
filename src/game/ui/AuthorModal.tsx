@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, Copy, ExternalLink, Heart, MessageSquare, Sparkles, X, ZoomIn } from 'lucide-react'
 import { useState } from 'react'
+import { useT } from '../i18n/store'
 import { useGameStore } from '../state/useGameStore'
 import { panelMotion } from './motion'
 
@@ -17,21 +18,22 @@ interface ImagePreview {
 }
 
 export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
+  const t = useT()
   const showToast = useGameStore((s) => s.showToast)
   const [copiedType, setCopiedType] = useState<'wechat' | 'qq' | null>(null)
   const [previewImg, setPreviewImg] = useState<ImagePreview | null>(null)
 
   if (!isOpen) return null
 
-  const handleCopy = (text: string, type: 'wechat' | 'qq', label: string) => {
+  const handleCopy = (text: string, type: 'wechat' | 'qq') => {
     navigator.clipboard.writeText(text).then(
       () => {
         setCopiedType(type)
-        showToast(`已复制${label}: ${text}`)
+        showToast(t(type === 'wechat' ? 'author.wechatCopied' : 'author.qqCopied', { value: text }))
         setTimeout(() => setCopiedType(null), 2000)
       },
       () => {
-        showToast(`复制失败，请手动长按复制: ${text}`)
+        showToast(t('author.copyFail', { value: text }))
       }
     )
   }
@@ -60,15 +62,15 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                 <Sparkles className="h-4 w-4" />
               </span>
               <div>
-                <div className="text-base font-bold text-ink">关于作者与开发生态</div>
-                <div className="text-[11px] text-ink-dim">Crafted with passion · 独立开发者生态</div>
+                <div className="text-base font-bold text-ink">{t('author.title')}</div>
+                <div className="text-[11px] text-ink-dim">{t('author.subtitle')}</div>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-dim transition-colors hover:bg-surface hover:text-ink"
-              aria-label="关闭"
+              aria-label={t('author.closeAria')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -84,13 +86,13 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-ink">博主：艺杯羹</span>
+                  <span className="text-sm font-bold text-ink">{t('author.name')}</span>
                   <span className="rounded-full bg-cyber-accent/15 px-2 py-0.5 text-[10px] font-semibold text-cyber-accent">
-                    独立开发者
+                    {t('author.badge')}
                   </span>
                 </div>
                 <div className="mt-0.5 text-xs text-ink-dim">
-                  效率工具与知识蒸馏系统创作者 · 专注全栈开发与 3D 交互
+                  {t('author.bio')}
                 </div>
               </div>
             </div>
@@ -100,21 +102,21 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
               <div className="flex items-center justify-between text-xs text-ink-dim">
                 <span className="flex items-center gap-1.5 font-medium text-ink">
                   <MessageSquare className="h-3.5 w-3.5 text-cyber-accent" />
-                  联系与交流
+                  {t('author.contact')}
                 </span>
-                <span className="text-[10px] text-ink-faint">有问题或建议欢迎随时联系</span>
+                <span className="text-[10px] text-ink-faint">{t('author.contactHint')}</span>
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                 {/* 微信号 */}
                 <button
                   type="button"
-                  onClick={() => handleCopy('peace-83', 'wechat', '微信号')}
+                  onClick={() => handleCopy('peace-83', 'wechat')}
                   className="group flex items-center justify-between rounded-lg border border-edge/40 bg-surface/60 px-2.5 py-1.5 transition-all hover:border-cyber-accent/60 hover:bg-surface active:scale-[0.98]"
-                  title="点击复制微信号"
+                  title={t('author.wechatCopyTitle')}
                 >
                   <div className="flex items-center gap-1.5 truncate">
-                    <span className="text-[11px] font-medium text-ink-dim">微信:</span>
+                    <span className="text-[11px] font-medium text-ink-dim">{t('author.wechatLabel')}</span>
                     <span className="font-mono text-xs font-semibold text-ink">peace-83</span>
                   </div>
                   {copiedType === 'wechat' ? (
@@ -127,12 +129,12 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                 {/* QQ号 */}
                 <button
                   type="button"
-                  onClick={() => handleCopy('3057454077', 'qq', 'QQ号')}
+                  onClick={() => handleCopy('3057454077', 'qq')}
                   className="group flex items-center justify-between rounded-lg border border-edge/40 bg-surface/60 px-2.5 py-1.5 transition-all hover:border-cyber-accent/60 hover:bg-surface active:scale-[0.98]"
-                  title="点击复制QQ号"
+                  title={t('author.qqCopyTitle')}
                 >
                   <div className="flex items-center gap-1.5 truncate">
-                    <span className="text-[11px] font-medium text-ink-dim">QQ:</span>
+                    <span className="text-[11px] font-medium text-ink-dim">{t('author.qqLabel')}</span>
                     <span className="font-mono text-xs font-semibold text-ink">3057454077</span>
                   </div>
                   {copiedType === 'qq' ? (
@@ -152,7 +154,7 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                 rel="noreferrer"
                 className="flex items-center justify-between rounded-xl border border-edge/40 bg-surface/30 px-3 py-2 text-ink transition-colors hover:border-cyber-accent/50 hover:bg-surface/70"
               >
-                <span>个人主页 (yibeigen.pages.dev)</span>
+                <span>{t('author.homepage')}</span>
                 <ExternalLink className="h-3.5 w-3.5 text-ink-faint" />
               </a>
               <a
@@ -161,7 +163,7 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                 rel="noreferrer"
                 className="flex items-center justify-between rounded-xl border border-edge/40 bg-surface/30 px-3 py-2 text-ink transition-colors hover:border-cyber-accent/50 hover:bg-surface/70"
               >
-                <span>CSDN 技术博客</span>
+                <span>{t('author.blog')}</span>
                 <ExternalLink className="h-3.5 w-3.5 text-ink-faint" />
               </a>
             </div>
@@ -173,33 +175,33 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                 onClick={() =>
                   setPreviewImg({
                     src: './wechat_qr.png',
-                    alt: '微信公众号【艺杯羹】',
-                    title: '微信公众号【艺杯羹】',
-                    desc: '微信扫一扫关注 · 回复「迷宫」加入交流群 · 获取更多开源工具',
+                    alt: t('author.wechatQrAlt'),
+                    title: t('author.wechatQrTitle'),
+                    desc: t('author.wechatQrDesc'),
                   })
                 }
                 className="group relative flex cursor-pointer flex-col items-center rounded-xl border border-edge/50 bg-sunken/40 p-2.5 sm:p-3 text-center transition-all hover:border-cyber-accent/50 hover:bg-sunken/60"
-                title="单击放大查看二维码"
+                title={t('author.wechatZoomTitle')}
               >
                 <div className="relative overflow-hidden rounded-lg">
                   <img
                     src="./wechat_qr.png"
-                    alt="微信公众号【艺杯羹】"
+                    alt={t('author.wechatQrAlt')}
                     className="h-24 w-24 rounded-lg border border-edge/40 bg-white object-contain p-1 shadow-sm transition-transform duration-200 group-hover:scale-105 sm:h-28 sm:w-28"
                   />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[1px] transition-opacity group-hover:opacity-100">
                     <span className="flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
                       <ZoomIn className="h-3 w-3" />
-                      放大
+                      {t('author.zoom')}
                     </span>
                   </div>
                 </div>
-                <div className="mt-2 text-xs font-bold text-ink">微信公众号【艺杯羹】</div>
+                <div className="mt-2 text-xs font-bold text-ink">{t('author.wechatQrTitle')}</div>
                 <div className="mt-0.5 text-[10px] text-ink-faint">
-                  扫码关注 · 回复「<b className="text-cyber-accent">迷宫</b>」进群
+                  {t('author.wechatQrShort')}
                 </div>
                 <div className="mt-1 text-[9px] text-cyber-accent opacity-80 group-hover:opacity-100">
-                  🔍 单击可放大查看
+                  🔍 {t('author.zoom')}
                 </div>
               </div>
 
@@ -208,36 +210,36 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                 onClick={() =>
                   setPreviewImg({
                     src: './reward_qr.png',
-                    alt: '赞赏支持作者',
-                    title: '赞赏支持作者 (Reward)',
-                    desc: '开源不易，如果本作对您有启发或带来了快乐，欢迎赞赏请作者喝杯咖啡 ☕',
+                    alt: t('author.rewardAlt'),
+                    title: t('author.rewardTitle'),
+                    desc: t('author.rewardDesc'),
                   })
                 }
                 className="group relative flex cursor-pointer flex-col items-center rounded-xl border border-edge/50 bg-sunken/40 p-2.5 sm:p-3 text-center transition-all hover:border-rose-400/50 hover:bg-sunken/60"
-                title="单击放大查看赞赏码"
+                title={t('author.rewardZoomTitle')}
               >
                 <div className="relative overflow-hidden rounded-lg">
                   <img
                     src="./reward_qr.png"
-                    alt="赞赏支持作者"
+                    alt={t('author.rewardAlt')}
                     className="h-24 w-24 rounded-lg border border-edge/40 bg-white object-contain p-1 shadow-sm transition-transform duration-200 group-hover:scale-105 sm:h-28 sm:w-28"
                   />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[1px] transition-opacity group-hover:opacity-100">
                     <span className="flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
                       <ZoomIn className="h-3 w-3" />
-                      放大
+                      {t('author.zoom')}
                     </span>
                   </div>
                 </div>
                 <div className="mt-2 flex items-center justify-center gap-1 text-xs font-bold text-ink">
                   <Heart className="h-3 w-3 fill-current text-rose-500" />
-                  <span>赞赏支持作者</span>
+                  <span>{t('author.reward')}</span>
                 </div>
                 <div className="mt-0.5 text-[10px] text-ink-faint">
-                  开源不易 · 喜欢本作请喝咖啡 ☕
+                  {t('author.rewardShort')}
                 </div>
                 <div className="mt-1 text-[9px] text-rose-400 opacity-80 group-hover:opacity-100">
-                  🔍 单击可放大查看
+                  🔍 {t('author.zoom')}
                 </div>
               </div>
             </div>
@@ -245,8 +247,8 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
             {/* 5. 作者精选开源作品（均可直接点击访问） */}
             <div className="space-y-2 rounded-xl border border-edge/40 bg-surface/40 p-3.5">
               <div className="flex items-center justify-between text-xs font-bold text-ink">
-                <span>作者精选开源作品</span>
-                <span className="text-[10px] font-normal text-ink-faint">点击卡片直达项目</span>
+                <span>{t('author.projectsTitle')}</span>
+                <span className="text-[10px] font-normal text-ink-faint">{t('author.projectsHint')}</span>
               </div>
 
               <div className="space-y-2 text-xs">
@@ -259,15 +261,15 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                       rel="noreferrer"
                       className="flex items-center gap-1.5 font-semibold text-ink group-hover:text-cyber-accent"
                     >
-                      <span>🚀 BlogDistiller · 博萃</span>
+                      <span>{t('author.blogdistillerTitle')}</span>
                       <ExternalLink className="h-3.5 w-3.5 text-ink-faint group-hover:text-cyber-accent" />
                     </a>
                     <span className="rounded-md bg-cyber-accent/15 px-2 py-0.5 text-[10px] font-medium text-cyber-accent">
-                      回复「文章」领口令
+                      {t('author.blogdistillerBadge')}
                     </span>
                   </div>
                   <div className="mt-1 text-[11px] leading-relaxed text-ink-dim">
-                    全网博文批量下载与知识蒸馏神器，支持微信公众号、知乎、微博、CSDN 等 9 大主流平台全量去噪与多格式导出。
+                    {t('author.blogdistillerDesc')}
                   </div>
                   <div className="mt-2 flex items-center gap-3 text-[10px] text-ink-faint">
                     <a
@@ -276,7 +278,7 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                       rel="noreferrer"
                       className="hover:text-cyber-accent hover:underline"
                     >
-                      🌐 官方文档主页
+                      {t('author.docs')}
                     </a>
                     <span>·</span>
                     <a
@@ -285,7 +287,7 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                       rel="noreferrer"
                       className="hover:text-cyber-accent hover:underline"
                     >
-                      💻 GitHub 开源仓库
+                      {t('author.github')}
                     </a>
                   </div>
                 </div>
@@ -299,15 +301,15 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                       rel="noreferrer"
                       className="flex items-center gap-1.5 font-semibold text-ink group-hover:text-emerald-400"
                     >
-                      <span>🎬 智能跟随提词器</span>
+                      <span>{t('author.teleprompterTitle')}</span>
                       <ExternalLink className="h-3.5 w-3.5 text-ink-faint group-hover:text-emerald-400" />
                     </a>
                     <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
-                      在线免安装 · 直接可用
+                      {t('author.teleprompterBadge')}
                     </span>
                   </div>
                   <div className="mt-1 text-[11px] leading-relaxed text-ink-dim">
-                    纯前端高性能智能提词器，融合 AI 语音跟读滚动与画中画 (PiP) 桌面置顶悬浮，录课、口播、直播神器。
+                    {t('author.teleprompterDesc')}
                   </div>
                   <div className="mt-2 flex items-center gap-3 text-[10px] text-ink-faint">
                     <a
@@ -316,7 +318,7 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                       rel="noreferrer"
                       className="text-emerald-400 hover:underline font-medium"
                     >
-                      🚀 点击立刻在线使用
+                      {t('author.useNow')}
                     </a>
                     <span>·</span>
                     <a
@@ -325,14 +327,14 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                       rel="noreferrer"
                       className="hover:text-ink hover:underline"
                     >
-                      💻 GitHub 开源仓库
+                      {t('author.github')}
                     </a>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-lg bg-cyber-accent/10 px-3 py-2 text-center text-[11px] text-ink-dim">
-                💡 关注微信公众号【<b className="text-ink">艺杯羹</b>】回复「<b>迷宫</b>」进交流群，回复「<b>文章</b>」获取博萃客户端口令！
+                {t('author.tip')}
               </div>
             </div>
           </div>
@@ -344,7 +346,7 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
               onClick={onClose}
               className="flex min-h-[42px] w-full items-center justify-center rounded-xl border border-edge/60 bg-surface text-xs font-semibold text-ink transition-colors hover:bg-surface/80"
             >
-              关闭
+              {t('common.close')}
             </button>
           </div>
         </motion.div>
@@ -368,7 +370,7 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
                 type="button"
                 onClick={() => setPreviewImg(null)}
                 className="absolute right-3 top-3 rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-surface hover:text-ink"
-                aria-label="关闭预览"
+                aria-label={t('author.closePreviewAria')}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -384,14 +386,14 @@ export function AuthorModal({ isOpen, onClose }: AuthorModalProps) {
               </div>
 
               <div className="text-xs text-ink-dim">{previewImg.desc}</div>
-              <div className="mt-1 text-[11px] text-ink-faint">手机端可长按图片保存或识别二维码</div>
+              <div className="mt-1 text-[11px] text-ink-faint">{t('author.previewHint')}</div>
 
               <button
                 type="button"
                 onClick={() => setPreviewImg(null)}
                 className="mt-4 flex min-h-[38px] w-full items-center justify-center rounded-xl bg-surface border border-edge/60 text-xs font-semibold text-ink hover:bg-surface/80"
               >
-                关闭预览
+                {t('author.closePreview')}
               </button>
             </motion.div>
           </div>
