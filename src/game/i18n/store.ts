@@ -16,7 +16,10 @@ import {
 const KEY_LANG = 'ckl:settings:lang'
 
 export function getStoredLang(): Lang {
-  return getStorageItem(KEY_LANG) === 'en' ? 'en' : 'zh'
+  const stored = getStorageItem(KEY_LANG)
+  if (stored === 'zh' || stored === 'en') return stored
+  // First visit has no stored preference: follow the browser, fall back to English.
+  return navigator?.language?.toLowerCase().startsWith('zh') ? 'zh' : 'en'
 }
 
 function setMeta(selector: string, content: string) {
