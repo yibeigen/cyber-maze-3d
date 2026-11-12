@@ -3,8 +3,10 @@ import { controller } from '../controller'
 import { Dir, screenToWorldDir } from '../core/grid'
 import { useGameStore } from '../state/useGameStore'
 
-/** 按住多久之后才进入连续移动（毫秒） */
-const HOLD_TO_RUN_MS = 280
+/** 按住或拖动多久之后转入连续移动（毫秒） */
+const HOLD_TO_RUN_MS = 160
+/** 判定滑动手势的最小位移阈值 */
+const SWIPE_THRESHOLD_PX = 20
 
 export function useSwipeInput(): void {
   const startPosRef = useRef<{ x: number; y: number } | null>(null)
@@ -34,7 +36,12 @@ export function useSwipeInput(): void {
         return
       }
 
-      // 建造动画期间轻点即跳过，移动端不强制依赖滑动
+      // 如果开启了触控手柄且触控点落在左侧摇杆感应区域，由摇杆优先捕获
+      if (store.showTouchControls && e.clientX < window.innerWidth * 0.6) {
+        return
+      }
+
+      // 建造动画期间轻点即跳过
       const engine = controller.getEngine()
       if (engine?.phase === 'revealing') {
         engine.skipReveal()
@@ -58,16 +65,14 @@ export function useSwipeInput(): void {
       if (engine.phase === 'revealing') {
         engine.skipReveal()
       }
-      // ready 阶段同样必须接受输入：引擎需要第一次有效输入才会由 ready 切到 playing，
-      // 否则触屏玩家会被卡在 ready 阶段，永远走不出第一步。
       if (engine.phase !== 'ready' && engine.phase !== 'playing') return
 
       const dx = e.clientX - startPosRef.current.x
       const dy = e.clientY - startPosRef.current.y
       const dist = Math.hypot(dx, dy)
 
-      // 拖动距离必须超过 24px 阈值（8.3）
-      if (dist >= 24) {
+      // 拖动距离超过阈值判定方向
+      if (dist >= SWIPE_THRESHOLD_PX) {
         let screenDir: Dir
         if (Math.abs(dx) > Math.abs(dy)) {
           screenDir = dx > 0 ? 1 : 3 // 1=Right, 3=Left
@@ -75,13 +80,20 @@ export function useSwipeInput(): void {
           screenDir = dy > 0 ? 2 : 0 // 2=Down, 0=Up
         }
 
+        // 核心修复：更新滑动基准锚点，使下一次转弯能以当前手指位置即时响应，解决滑动转弯卡死 Bug
+        startPosRef.current = { x: e.clientX, y: e.clientY }
+
         if (currentScreenDirRef.current !== screenDir) {
           currentScreenDirRef.current = screenDir
           const yawStep = store.yawStep
           const worldDir = screenToWorldDir(screenDir, yawStep)
 
-          // 快速短滑只走一格，保证岔路口能停准；
-          // 手指按住不动超过阈值才转入连续移动，长走廊不用反复划。
+          try {
+            navigator.vibrate?.(10)
+          } catch {
+            // Haptics optional
+          }
+
           clearHoldTimer()
           engine.tap(worldDir)
           holdTimerRef.current = setTimeout(() => {
@@ -96,7 +108,6 @@ export function useSwipeInput(): void {
 
     const handlePointerEnd = () => {
       clearHoldTimer()
-      // 没有进行中的手势时不要清理 held，避免打断键盘长按
       if (!startPosRef.current) return
       startPosRef.current = null
       currentScreenDirRef.current = null

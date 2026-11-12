@@ -27,6 +27,8 @@ export function PauseMenu() {
   const activeSeed = useGameStore((s) => s.activeSeed)
   const showTouchControls = useGameStore((s) => s.showTouchControls)
   const toggleTouchControls = useGameStore((s) => s.toggleTouchControls)
+  const touchControlMode = useGameStore((s) => s.touchControlMode)
+  const setTouchControlMode = useGameStore((s) => s.setTouchControlMode)
   const cameraMode = useGameStore((s) => s.cameraMode)
 
   const engine = controller.getEngine()
@@ -133,6 +135,36 @@ export function PauseMenu() {
               />
             </button>
           </div>
+
+          {showTouchControls && (
+            <div className="flex items-center justify-between rounded-xl glass-inset px-4 py-2">
+              <span className="text-xs text-ink-dim">{t('pause.touchMode')}</span>
+              <div className="flex rounded-lg border border-edge/40 bg-sunken/60 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setTouchControlMode('joystick')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
+                    touchControlMode === 'joystick'
+                      ? 'bg-cyber-accent text-accent-ink'
+                      : 'text-ink-dim hover:text-ink'
+                  }`}
+                >
+                  {t('touch.modeJoystick')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTouchControlMode('dpad')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
+                    touchControlMode === 'dpad'
+                      ? 'bg-cyber-accent text-accent-ink'
+                      : 'text-ink-dim hover:text-ink'
+                  }`}
+                >
+                  {t('touch.modeDpad')}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-between rounded-xl glass-inset px-4 py-2.5">
             <span className="text-xs text-ink-dim">{t('pause.sound')}</span>

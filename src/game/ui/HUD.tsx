@@ -222,13 +222,13 @@ export function HUD() {
   const mode = useGameStore((s) => s.mode)
 
   const tutorial = activeLevel?.tutorial
-  const [taskExpanded, setTaskExpanded] = useState(true)
+  const [taskExpanded, setTaskExpanded] = useState(() => !showTouchControls || !!tutorial)
   const [taskPinned, setTaskPinned] = useState(false)
 
   useEffect(() => {
-    setTaskExpanded(true)
+    setTaskExpanded(!showTouchControls || !!tutorial)
     setTaskPinned(!!tutorial)
-  }, [runId, tutorial])
+  }, [runId, tutorial, showTouchControls])
 
   useEffect(() => {
     if (taskPinned) return
@@ -286,10 +286,52 @@ export function HUD() {
           {tutorial === 'shift' && <p className="leading-relaxed">{t('hud.tutorialShift')}</p>}
           {!tutorial && (
             <>
-              <div className="flex items-center justify-between gap-3"><span>{t(cameraMode === 'first' ? 'hud.controlsForwardTurn' : 'hud.controlsMove')}</span><kbd className={KEY_CAP}>{cameraMode === 'first' ? 'W / A D' : 'WASD'}</kbd></div>
-              <div className="flex items-center justify-between gap-3"><span>{t('hud.controlsScan')}</span><kbd className={KEY_CAP}>F</kbd></div>
-              {shifting && <div className="flex items-center justify-between gap-3"><span>{t('hud.controlsForce')}</span><kbd className={KEY_CAP}>G</kbd></div>}
-              <div className="flex items-center justify-between gap-3 text-ink-faint"><span>{t('hud.controlsSurvey')}</span><span className="flex gap-1"><kbd className={KEY_CAP}>{t('key.space')}</kbd><kbd className={KEY_CAP}>V</kbd></span></div>
+              {showTouchControls ? (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>{t('hud.controlsMove')}</span>
+                    <span className="font-semibold text-cyber-accent">{t('hud.touchMoveTip')}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>{t('hud.controlsScan')}</span>
+                    <span className="font-semibold text-cyber-accent">{t('hud.touchScanTip')}</span>
+                  </div>
+                  {shifting && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span>{t('hud.controlsForce')}</span>
+                      <span className="font-semibold text-warn">{t('hud.touchForceTip')}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-3 text-ink-faint">
+                    <span>{t('hud.controlsSurvey')}</span>
+                    <span>{t('hud.touchSurveyTip')}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>{t(cameraMode === 'first' ? 'hud.controlsForwardTurn' : 'hud.controlsMove')}</span>
+                    <kbd className={KEY_CAP}>{cameraMode === 'first' ? 'W / A D' : 'WASD'}</kbd>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>{t('hud.controlsScan')}</span>
+                    <kbd className={KEY_CAP}>F</kbd>
+                  </div>
+                  {shifting && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span>{t('hud.controlsForce')}</span>
+                      <kbd className={KEY_CAP}>G</kbd>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-3 text-ink-faint">
+                    <span>{t('hud.controlsSurvey')}</span>
+                    <span className="flex gap-1">
+                      <kbd className={KEY_CAP}>{t('key.space')}</kbd>
+                      <kbd className={KEY_CAP}>V</kbd>
+                    </span>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

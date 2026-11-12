@@ -34,6 +34,7 @@ export function FloorTiles({
   const prevFloodingRef = useRef(false)
   const prevVisitCountRef = useRef(1)
   const prevColorVersionRef = useRef<number | undefined>(undefined)
+  const pointerDownRef = useRef<{ x: number; y: number; time: number } | null>(null)
 
   const themeKey = useGameStore((s) => s.theme)
   const theme = THEMES[themeKey] || THEMES.cyber
@@ -151,6 +152,28 @@ export function FloorTiles({
         args={[undefined, undefined, totalRooms]}
         receiveShadow
         frustumCulled={false}
+        onPointerDown={(e) => {
+          pointerDownRef.current = { x: e.clientX, y: e.clientY, time: performance.now() }
+        }}
+        onPointerUp={(e) => {
+          if (!pointerDownRef.current) return
+          const dt = performance.now() - pointerDownRef.current.time
+          const dist = Math.hypot(e.clientX - pointerDownRef.current.x, e.clientY - pointerDownRef.current.y)
+          pointerDownRef.current = null
+          // 仅在轻点（非拖拽、滑动）且非第一人称时触发点击寻路
+          if (dt < 320 && dist < 14 && e.instanceId !== undefined && engine) {
+            if (engine.phase === 'ready' || engine.phase === 'playing') {
+              const ok = engine.navigateTo(e.instanceId)
+              if (ok) {
+                try {
+                  navigator.vibrate?.(12)
+                } catch {
+                  // Haptics optional
+                }
+              }
+            }
+          }
+        }}
       >
         <boxGeometry args={[1, 1, 1]} />
         {/*

@@ -18,6 +18,9 @@ import {
   saveStoredQuality,
   saveStoredSoundEnabled,
   saveStoredTheme,
+  TouchControlMode,
+  getStoredTouchControlMode,
+  saveStoredTouchControlMode,
   VisualTheme,
 } from './persistence'
 
@@ -109,6 +112,9 @@ export interface GameState {
   showTouchControls: boolean
   setShowTouchControls: (show: boolean) => void
   toggleTouchControls: () => void
+  touchControlMode: TouchControlMode
+  setTouchControlMode: (mode: TouchControlMode) => void
+  toggleTouchControlMode: () => void
 
   // UI 动作
   setPage: (page: 'title' | 'game' | 'lab') => void
@@ -240,6 +246,17 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setShowTouchControls: (show) => set({ showTouchControls: show }),
   toggleTouchControls: () => set((s) => ({ showTouchControls: !s.showTouchControls })),
+
+  touchControlMode: getStoredTouchControlMode(),
+  setTouchControlMode: (mode) => {
+    saveStoredTouchControlMode(mode)
+    set({ touchControlMode: mode })
+  },
+  toggleTouchControlMode: () => {
+    const nextMode = get().touchControlMode === 'joystick' ? 'dpad' : 'joystick'
+    saveStoredTouchControlMode(nextMode)
+    set({ touchControlMode: nextMode })
+  },
 
   setPage: (page) => set({ currentPage: page }),
   setSize: (size) => set({ size }),

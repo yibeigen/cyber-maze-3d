@@ -22,6 +22,7 @@ import { generate, pickStartExit } from '../core/generate'
 import {
   DIR_DELTA,
   Dir,
+  edgeBetween,
   edgeCount,
   edgeRooms,
   isSpanningTree,
@@ -119,6 +120,9 @@ export class GameEngine {
     roomPopTimes: Map<number, number>
     pathVisibleStartTime: number
   } | null = null
+
+  // 自动寻路队列（点击直达 / Tap-to-Move）
+  private autoPath: number[] | null = null
 
   // 事件监听器
   private listeners: Set<(ev: GameEvent) => void> = new Set()
@@ -342,16 +346,52 @@ export class GameEngine {
   // --- 控制命令 ---
 
   setHeld(dir: Dir | null): void {
+    if (dir !== null) this.autoPath = null
     this.heldDir = dir
   }
 
   tap(dir: Dir): void {
+    this.autoPath = null
     this.bufferDir = dir
   }
 
   clearInput(): void {
+    this.autoPath = null
     this.heldDir = null
     this.bufferDir = null
+  }
+
+  /**
+   * 自动寻路移动到目标房间（用于手机端点击地面直达）
+   */
+  navigateTo(targetRoom: number): boolean {
+    if (this._phase !== 'ready' && this._phase !== 'playing') return false
+    if (this.isShifting) return false
+    if (targetRoom === this.playerRoom) return false
+
+    const fromRoom = this.move ? this.move.to : this.playerRoom
+    const solveRes = solve(
+      'astar',
+      this.maze,
+      fromRoom,
+      targetRoom,
+      (e) => this.isEdgePassable(e),
+    )
+
+    if (!solveRes.path || solveRes.path.length <= 1) return false
+
+    if (this._phase === 'ready') {
+      const prev = this._phase
+      this._phase = 'playing'
+      this.emit({ type: 'phase', phase: 'playing', prev, runId: this.runId })
+    }
+
+    this.autoPath = solveRes.path.slice(1)
+    return true
+  }
+
+  cancelNavigation(): void {
+    this.autoPath = null
   }
 
   setSurvey(on: boolean): void {
@@ -666,8 +706,33 @@ export class GameEngine {
 
       // ⑤ 尝试开始新的移动
       if ((this._phase === 'ready' || this._phase === 'playing') && !this.move && !this.survey) {
-        const nextDir = this.bufferDir !== null ? this.bufferDir : this.heldDir
+        let nextDir = this.bufferDir !== null ? this.bufferDir : this.heldDir
         this.bufferDir = null
+
+        // 处理点击直达自动寻路队列（无手动方向输入时生效）
+        if (nextDir === null && this.autoPath && this.autoPath.length > 0) {
+          const nextRoom = this.autoPath[0]
+          const edge = edgeBetween(this.playerRoom, nextRoom, this.maze.w, this.maze.h)
+          if (edge !== -1 && this.isEdgePassable(edge)) {
+            const x1 = this.playerRoom % this.maze.w
+            const y1 = Math.floor(this.playerRoom / this.maze.w)
+            const x2 = nextRoom % this.maze.w
+            const y2 = Math.floor(nextRoom / this.maze.w)
+            let d: Dir = 0
+            if (x2 > x1) d = 1
+            else if (x2 < x1) d = 3
+            else if (y2 > y1) d = 2
+            else if (y2 < y1) d = 0
+            nextDir = d
+            this.autoPath.shift()
+          } else {
+            // 路径被阻挡（例如发生形变）
+            this.autoPath = null
+          }
+        } else if (nextDir !== null) {
+          // 手动输入打断自动寻路
+          this.autoPath = null
+        }
 
         if (nextDir !== null) {
           const nb = neighbor(this.playerRoom, nextDir, this.maze.w, this.maze.h)
@@ -876,6 +941,7 @@ export class GameEngine {
     this.isShifting = false
     this.shiftPhase = 'none'
     this.currentShiftPlan = null
+    this.autoPath = null
     this._shiftsDone++
     // 拓扑已变，理论最优步数与逃脱距离读数需要重算
     this._optimalCache = null
