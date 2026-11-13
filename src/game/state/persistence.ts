@@ -272,3 +272,14 @@ export function getStoredTouchControls(): boolean | null {
 export function saveStoredTouchControls(show: boolean): void {
   setStorageItem('ckl:settings:touch_controls', show ? '1' : '0')
 }
+
+export type ScreenOrientationMode = 'portrait' | 'landscape'
+
+export function getStoredOrientationMode(): ScreenOrientationMode {
+  const val = getStorageItem('ckl:settings:orientation')
+  return val === 'landscape' ? 'landscape' : 'portrait'
+}
+
+export function saveStoredOrientationMode(mode: ScreenOrientationMode): void {
+  setStorageItem('ckl:settings:orientation', mode)
+}

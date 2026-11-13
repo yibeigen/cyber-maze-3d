@@ -9,6 +9,7 @@ import {
   MonitorSmartphone,
   Play,
   SlidersHorizontal,
+  Smartphone,
   Star,
   User,
   Volume2,
@@ -56,6 +57,8 @@ export function TitleScreen() {
   const isMobile = useGameStore((s) => s.isMobile)
   const showTouchControls = useGameStore((s) => s.showTouchControls)
   const toggleTouchControls = useGameStore((s) => s.toggleTouchControls)
+  const orientationMode = useGameStore((s) => s.orientationMode)
+  const toggleOrientationMode = useGameStore((s) => s.toggleOrientationMode)
   const reducedMotion = useGameStore((s) => s.reducedMotion)
   const campaign = useGameStore((s) => s.campaign)
 
@@ -307,6 +310,16 @@ export function TitleScreen() {
                     ? t('title.mobileDetected')
                     : t('title.touchOn')
                   : t('title.touchOff')}
+              </span>
+            </button>
+            <button
+              onClick={toggleOrientationMode}
+              className={GHOST}
+              title={t('touch.orientationToggle')}
+            >
+              <Smartphone className={`h-4 w-4 transition-transform duration-200 ${orientationMode === 'landscape' ? 'rotate-90 text-cyber-accent' : ''}`} />
+              <span>
+                {orientationMode === 'landscape' ? t('common.landscape') : t('common.portrait')}
               </span>
             </button>
             <button

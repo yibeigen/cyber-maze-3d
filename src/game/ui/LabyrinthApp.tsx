@@ -3,6 +3,7 @@ import { Eye } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { controller } from '../controller'
 import { useT } from '../i18n/store'
+import { isForcedLandscape } from '../input/orientationHelper'
 import { useKeyboardInput } from '../input/useKeyboardInput'
 import { useSwipeInput } from '../input/useSwipeInput'
 import { GameCanvas } from '../scene/GameCanvas'
@@ -39,6 +40,26 @@ export function LabyrinthApp() {
   const cinematic = useGameStore((s) => s.cinematic)
   const toggleCinematic = useGameStore((s) => s.toggleCinematic)
   const mode = useGameStore((s) => s.mode)
+  const orientationMode = useGameStore((s) => s.orientationMode)
+
+  const [viewport, setViewport] = useState({
+    w: typeof window !== 'undefined' ? window.innerWidth : 1080,
+    h: typeof window !== 'undefined' ? window.innerHeight : 1920,
+  })
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewport({ w: window.innerWidth, h: window.innerHeight })
+    }
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('orientationchange', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleResize)
+    }
+  }, [])
+
+  const isForced = isForcedLandscape(orientationMode, viewport.w, viewport.h)
 
   const [showOnboarding, setShowOnboarding] = useState(() => !hasCompletedOnboarding())
   const [showResult, setShowResult] = useState(false)
@@ -57,7 +78,22 @@ export function LabyrinthApp() {
       <div
         data-theme={theme}
         data-reduced-motion={reducedMotion ? 'true' : 'false'}
-        className="relative w-screen h-screen overflow-hidden bg-cyber-dark select-none touch-none font-sans"
+        data-forced-landscape={isForced ? 'true' : 'false'}
+        className={`relative overflow-hidden bg-cyber-dark select-none touch-none font-sans ${
+          isForced ? 'fixed' : 'w-screen h-screen'
+        }`}
+        style={
+          isForced
+            ? {
+                left: '50%',
+                top: '50%',
+                width: `${viewport.h}px`,
+                height: `${viewport.w}px`,
+                transform: 'translate(-50%, -50%) rotate(90deg)',
+                transformOrigin: 'center center',
+              }
+            : undefined
+        }
       >
       {/* 3D WebGL 画布层 */}
       <GameCanvas>

@@ -29,6 +29,8 @@ export function PauseMenu() {
   const toggleTouchControls = useGameStore((s) => s.toggleTouchControls)
   const touchControlMode = useGameStore((s) => s.touchControlMode)
   const setTouchControlMode = useGameStore((s) => s.setTouchControlMode)
+  const orientationMode = useGameStore((s) => s.orientationMode)
+  const setOrientationMode = useGameStore((s) => s.setOrientationMode)
   const cameraMode = useGameStore((s) => s.cameraMode)
 
   const engine = controller.getEngine()
@@ -176,6 +178,35 @@ export function PauseMenu() {
               </div>
             </div>
           )}
+
+          {/* 屏幕方向模式切换 */}
+          <div className="flex items-center justify-between rounded-xl glass-inset px-4 py-2">
+            <span className="text-xs text-ink-dim">{t('pause.orientation')}</span>
+            <div className="flex rounded-lg border border-edge/40 bg-sunken/60 p-0.5">
+              <button
+                type="button"
+                onClick={() => setOrientationMode('portrait')}
+                className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
+                  orientationMode === 'portrait'
+                    ? 'bg-cyber-accent text-accent-ink'
+                    : 'text-ink-dim hover:text-ink'
+                }`}
+              >
+                {t('common.portrait')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrientationMode('landscape')}
+                className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
+                  orientationMode === 'landscape'
+                    ? 'bg-cyber-accent text-accent-ink'
+                    : 'text-ink-dim hover:text-ink'
+                }`}
+              >
+                {t('common.landscape')}
+              </button>
+            </div>
+          </div>
 
           <div className="flex items-center justify-between rounded-xl glass-inset px-4 py-2.5">
             <span className="text-xs text-ink-dim">{t('pause.sound')}</span>

@@ -348,9 +348,15 @@ const zh = {
   'touch.modeToggleTitle': '切换触控模式（动态摇杆 / 固定按键 / 划屏手势）',
   'touch.joystickHint': '按住左侧任意位置滑动移动',
   'touch.swipeHint': '在屏幕任意位置滑动作出移动',
+  'touch.orientationToggle': '切换横屏 / 竖屏模式',
+  'touch.orientationLandscape': '横屏模式',
+  'touch.orientationPortrait': '竖屏模式',
   'pause.touchMode': '触控操作模式',
+  'pause.orientation': '屏幕方向模式',
   'title.mobileDetected': '手机模式已就绪',
   'title.desktopDetected': '电脑桌面模式',
+  'common.portrait': '竖屏模式',
+  'common.landscape': '横屏模式',
 
   // Mini map
   'minimap.aria': '本局迷宫、最优路径与真实轨迹回放',
@@ -805,9 +811,15 @@ const en: Record<MessageKey, string> = {
   'touch.modeToggleTitle': 'Toggle touch mode (Joystick / D-Pad / Swipe)',
   'touch.joystickHint': 'Touch & drag anywhere on the left to move',
   'touch.swipeHint': 'Swipe anywhere on screen to move',
+  'touch.orientationToggle': 'Toggle Landscape / Portrait',
+  'touch.orientationLandscape': 'Landscape',
+  'touch.orientationPortrait': 'Portrait',
   'pause.touchMode': 'Touch control mode',
+  'pause.orientation': 'Screen orientation',
   'title.mobileDetected': 'Mobile mode active',
   'title.desktopDetected': 'Desktop mode',
+  'common.portrait': 'Portrait',
+  'common.landscape': 'Landscape',
 
   'minimap.aria': 'Maze, optimal path, and replay of your route',
 

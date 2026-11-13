@@ -23,6 +23,9 @@ import {
   saveStoredTouchControlMode,
   getStoredTouchControls,
   saveStoredTouchControls,
+  ScreenOrientationMode,
+  getStoredOrientationMode,
+  saveStoredOrientationMode,
   VisualTheme,
 } from './persistence'
 
@@ -110,8 +113,11 @@ export interface GameState {
   // 消息气泡 Toast
   toast: ToastMessage | null
 
-  // 设备感知
+  // 设备感知与横竖屏模式
   isMobile: boolean
+  orientationMode: ScreenOrientationMode
+  setOrientationMode: (mode: ScreenOrientationMode) => void
+  toggleOrientationMode: () => void
 
   // 触控控制器（移动端默认开启，桌面端可随时切换）
   showTouchControls: boolean
@@ -281,6 +287,39 @@ export const useGameStore = create<GameState>((set, get) => ({
     const nextMode: TouchControlMode = cur === 'joystick' ? 'dpad' : cur === 'dpad' ? 'swipe' : 'joystick'
     saveStoredTouchControlMode(nextMode)
     set({ touchControlMode: nextMode })
+  },
+
+  orientationMode: getStoredOrientationMode(),
+  setOrientationMode: (mode) => {
+    saveStoredOrientationMode(mode)
+    set({ orientationMode: mode })
+    if (mode === 'landscape') {
+      try {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {})
+        }
+        if (screen.orientation && 'lock' in screen.orientation) {
+          (screen.orientation as any).lock('landscape').catch(() => {})
+        }
+      } catch {}
+    } else {
+      try {
+        if (screen.orientation && 'unlock' in screen.orientation) {
+          (screen.orientation as any).unlock()
+        }
+        if (screen.orientation && 'lock' in screen.orientation) {
+          (screen.orientation as any).lock('portrait').catch(() => {})
+        }
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {})
+        }
+      } catch {}
+    }
+  },
+  toggleOrientationMode: () => {
+    const cur = get().orientationMode
+    const next: ScreenOrientationMode = cur === 'portrait' ? 'landscape' : 'portrait'
+    get().setOrientationMode(next)
   },
 
   setPage: (page) => set({ currentPage: page }),

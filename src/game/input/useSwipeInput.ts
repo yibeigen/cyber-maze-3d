@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { controller } from '../controller'
 import { Dir, screenToWorldDir } from '../core/grid'
 import { useGameStore } from '../state/useGameStore'
+import { isForcedLandscape, screenToLocalCoords } from './orientationHelper'
 
 /** 按住或拖动多久之后转入连续移动（毫秒） */
 const HOLD_TO_RUN_MS = 160
@@ -48,7 +49,8 @@ export function useSwipeInput(): void {
         return
       }
 
-      startPosRef.current = { x: e.clientX, y: e.clientY }
+      const isForced = isForcedLandscape(store.orientationMode, window.innerWidth, window.innerHeight)
+      startPosRef.current = screenToLocalCoords(e.clientX, e.clientY, isForced, window.innerWidth, window.innerHeight)
       currentScreenDirRef.current = null
       clearHoldTimer()
     }
@@ -67,8 +69,10 @@ export function useSwipeInput(): void {
       }
       if (engine.phase !== 'ready' && engine.phase !== 'playing') return
 
-      const dx = e.clientX - startPosRef.current.x
-      const dy = e.clientY - startPosRef.current.y
+      const isForced = isForcedLandscape(store.orientationMode, window.innerWidth, window.innerHeight)
+      const cur = screenToLocalCoords(e.clientX, e.clientY, isForced, window.innerWidth, window.innerHeight)
+      const dx = cur.x - startPosRef.current.x
+      const dy = cur.y - startPosRef.current.y
       const dist = Math.hypot(dx, dy)
 
       // 拖动距离超过阈值判定方向
@@ -81,7 +85,7 @@ export function useSwipeInput(): void {
         }
 
         // 核心修复：更新滑动基准锚点，使下一次转弯能以当前手指位置即时响应，解决滑动转弯卡死 Bug
-        startPosRef.current = { x: e.clientX, y: e.clientY }
+        startPosRef.current = cur
 
         if (currentScreenDirRef.current !== screenDir) {
           currentScreenDirRef.current = screenDir

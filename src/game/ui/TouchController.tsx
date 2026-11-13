@@ -6,6 +6,7 @@ import {
   Radar,
   RotateCw,
   SlidersHorizontal,
+  Smartphone,
   Zap,
   ChevronUp,
   ChevronDown,
@@ -16,6 +17,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { controller } from '../controller'
 import { Dir, neighbor, screenToWorldDir } from '../core/grid'
 import { useT } from '../i18n/store'
+import { isForcedLandscape, screenToLocalCoords } from '../input/orientationHelper'
 import { useGameStore } from '../state/useGameStore'
 
 const JOYSTICK_MAX_RADIUS = 46
@@ -118,6 +120,14 @@ export const TouchController = memo(function TouchController() {
   const toggleTouchControlMode = useGameStore((s) => s.toggleTouchControlMode)
   const cameraMode = useGameStore((s) => s.cameraMode)
   const toggleCameraMode = useGameStore((s) => s.toggleCameraMode)
+  const orientationMode = useGameStore((s) => s.orientationMode)
+  const toggleOrientationMode = useGameStore((s) => s.toggleOrientationMode)
+
+  const isForced = isForcedLandscape(
+    orientationMode,
+    typeof window !== 'undefined' ? window.innerWidth : 1080,
+    typeof window !== 'undefined' ? window.innerHeight : 1920
+  )
 
   const [activeDir, setActiveDir] = useState<Dir | null>(null)
 
@@ -217,12 +227,19 @@ export const TouchController = memo(function TouchController() {
       e.currentTarget.setPointerCapture(e.pointerId)
     } catch {}
     joystickPointerIdRef.current = e.pointerId
-    originRef.current = { x: e.clientX, y: e.clientY }
+    const local = screenToLocalCoords(
+      e.clientX,
+      e.clientY,
+      isForced,
+      window.innerWidth,
+      window.innerHeight
+    )
+    originRef.current = local
 
     setJoystick({
       active: true,
-      originX: e.clientX,
-      originY: e.clientY,
+      originX: local.x,
+      originY: local.y,
       knobX: 0,
       knobY: 0,
     })
@@ -231,8 +248,15 @@ export const TouchController = memo(function TouchController() {
   const handleJoystickZonePointerMove = (e: React.PointerEvent) => {
     if (joystickPointerIdRef.current !== e.pointerId) return
 
-    const dx = e.clientX - originRef.current.x
-    const dy = e.clientY - originRef.current.y
+    const cur = screenToLocalCoords(
+      e.clientX,
+      e.clientY,
+      isForced,
+      window.innerWidth,
+      window.innerHeight
+    )
+    const dx = cur.x - originRef.current.x
+    const dy = cur.y - originRef.current.y
     const dist = Math.hypot(dx, dy)
 
     if (dist < JOYSTICK_DEADZONE) {
@@ -274,8 +298,22 @@ export const TouchController = memo(function TouchController() {
   const fixedDirectionFromPointer = (e: React.PointerEvent): Dir | null => {
     const rect = fixedPadRef.current?.getBoundingClientRect()
     if (!rect) return null
-    const dx = e.clientX - (rect.left + rect.width / 2)
-    const dy = e.clientY - (rect.top + rect.height / 2)
+    const cur = screenToLocalCoords(
+      e.clientX,
+      e.clientY,
+      isForced,
+      window.innerWidth,
+      window.innerHeight
+    )
+    const center = screenToLocalCoords(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2,
+      isForced,
+      window.innerWidth,
+      window.innerHeight
+    )
+    const dx = cur.x - center.x
+    const dy = cur.y - center.y
     if (Math.hypot(dx, dy) < 14) return null
     const angleDeg = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360
     const engine = controller.getEngine()
@@ -496,6 +534,21 @@ export const TouchController = memo(function TouchController() {
             title={t('touch.cameraTitle')}
           >
             <Compass className="h-4 w-4" />
+          </button>
+
+          {/* 横屏 / 竖屏 模式切换 */}
+          <button
+            type="button"
+            onClick={toggleOrientationMode}
+            className={`flex h-10 w-10 items-center justify-center rounded-xl border backdrop-blur-md active:scale-95 transition-all ${
+              orientationMode === 'landscape'
+                ? 'border-cyber-accent/80 bg-cyber-accent/15 text-cyber-accent shadow-sm shadow-cyber-accent/30'
+                : 'border-edge/60 bg-surface/75 text-ink-dim'
+            }`}
+            title={t('touch.orientationToggle')}
+            aria-label={t('touch.orientationToggle')}
+          >
+            <Smartphone className={`h-4 w-4 transition-transform duration-200 ${orientationMode === 'landscape' ? 'rotate-90 text-cyber-accent' : ''}`} />
           </button>
         </div>
 
