@@ -250,13 +250,25 @@ export function saveStoredCameraMode(mode: CameraMode): void {
   setStorageItem('ckl:settings:camera', mode)
 }
 
-export type TouchControlMode = 'joystick' | 'dpad'
+export type TouchControlMode = 'joystick' | 'dpad' | 'swipe'
 
 export function getStoredTouchControlMode(): TouchControlMode {
   const val = getStorageItem('ckl:settings:touch_mode')
-  return val === 'dpad' ? 'dpad' : 'joystick'
+  if (val === 'dpad' || val === 'swipe' || val === 'joystick') return val
+  return 'joystick'
 }
 
 export function saveStoredTouchControlMode(mode: TouchControlMode): void {
   setStorageItem('ckl:settings:touch_mode', mode)
+}
+
+export function getStoredTouchControls(): boolean | null {
+  const val = getStorageItem('ckl:settings:touch_controls')
+  if (val === '1') return true
+  if (val === '0') return false
+  return null
+}
+
+export function saveStoredTouchControls(show: boolean): void {
+  setStorageItem('ckl:settings:touch_controls', show ? '1' : '0')
 }

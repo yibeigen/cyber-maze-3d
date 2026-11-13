@@ -21,6 +21,7 @@ export function GameScene({ engine }: GameSceneProps) {
   // 摄影棚环境反射：让墙体 PBR 材质真正显色（此前无 envMap，金属墙全黑）
   useStudioEnvironment()
   const quality = useGameStore((s) => s.quality)
+  const isMobile = useGameStore((s) => s.isMobile)
   const isHighQuality = quality === 'high' || quality === 'auto'
   const maze = engine.maze
 
@@ -68,8 +69,8 @@ export function GameScene({ engine }: GameSceneProps) {
         color={theme.lightDirColor}
         intensity={theme.lightDirIntensity}
         castShadow={isHighQuality}
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={isMobile ? 1024 : 2048}
+        shadow-mapSize-height={isMobile ? 1024 : 2048}
         shadow-camera-near={1}
         shadow-camera-far={80}
         shadow-camera-left={-shadowFrustum}

@@ -21,6 +21,8 @@ import {
   TouchControlMode,
   getStoredTouchControlMode,
   saveStoredTouchControlMode,
+  getStoredTouchControls,
+  saveStoredTouchControls,
   VisualTheme,
 } from './persistence'
 
@@ -108,6 +110,9 @@ export interface GameState {
   // 消息气泡 Toast
   toast: ToastMessage | null
 
+  // 设备感知
+  isMobile: boolean
+
   // 触控控制器（移动端默认开启，桌面端可随时切换）
   showTouchControls: boolean
   setShowTouchControls: (show: boolean) => void
@@ -153,6 +158,15 @@ export interface GameState {
     shiftsDone: number
     optimalMoves: number
   }) => void
+}
+
+export function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false
+  const ua = navigator.userAgent || ''
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua)
+  const isTouch = 'ontouchstart' in window || (navigator.maxTouchPoints != null && navigator.maxTouchPoints > 0)
+  const isNarrowScreen = window.innerWidth <= 840
+  return isMobileUA || (isTouch && isNarrowScreen) || isTouch
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -240,12 +254,22 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastResult: null,
 
   toast: null,
-  showTouchControls:
-    typeof window !== 'undefined' &&
-    ('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || window.innerWidth < 1024),
+  isMobile: isMobileDevice(),
+  showTouchControls: (() => {
+    const stored = getStoredTouchControls()
+    return stored !== null ? stored : isMobileDevice()
+  })(),
 
-  setShowTouchControls: (show) => set({ showTouchControls: show }),
-  toggleTouchControls: () => set((s) => ({ showTouchControls: !s.showTouchControls })),
+  setShowTouchControls: (show) => {
+    saveStoredTouchControls(show)
+    set({ showTouchControls: show })
+  },
+  toggleTouchControls: () =>
+    set((s) => {
+      const next = !s.showTouchControls
+      saveStoredTouchControls(next)
+      return { showTouchControls: next }
+    }),
 
   touchControlMode: getStoredTouchControlMode(),
   setTouchControlMode: (mode) => {
@@ -253,7 +277,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ touchControlMode: mode })
   },
   toggleTouchControlMode: () => {
-    const nextMode = get().touchControlMode === 'joystick' ? 'dpad' : 'joystick'
+    const cur = get().touchControlMode
+    const nextMode: TouchControlMode = cur === 'joystick' ? 'dpad' : cur === 'dpad' ? 'swipe' : 'joystick'
     saveStoredTouchControlMode(nextMode)
     set({ touchControlMode: nextMode })
   },

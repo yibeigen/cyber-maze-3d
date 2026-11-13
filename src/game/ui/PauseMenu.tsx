@@ -162,6 +162,17 @@ export function PauseMenu() {
                 >
                   {t('touch.modeDpad')}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setTouchControlMode('swipe')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
+                    touchControlMode === 'swipe'
+                      ? 'bg-cyber-accent text-accent-ink'
+                      : 'text-ink-dim hover:text-ink'
+                  }`}
+                >
+                  {t('touch.modeSwipe')}
+                </button>
               </div>
             </div>
           )}

@@ -29,6 +29,7 @@ export function GameCanvas({ children }: GameCanvasProps) {
   const [contextLost, setContextLost] = useState(false)
 
   const quality = useGameStore((s) => s.quality)
+  const isMobile = useGameStore((s) => s.isMobile)
 
   // 自动降级只作用于本次会话，不写回用户设置：
   // 否则一次偶发掉帧会把"自动"永久锁成"低画质"，用户再也回不去。
@@ -81,9 +82,15 @@ export function GameCanvas({ children }: GameCanvasProps) {
       <Canvas
         camera={{ position: [0, 20, 10], fov: 45, near: 0.08, far: 200 }}
         shadows={!isLowQuality}
-        dpr={isLowQuality ? 1 : [1, 2]}
+        dpr={
+          isLowQuality
+            ? 1
+            : isMobile
+              ? Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5)
+              : [1, 2]
+        }
         gl={{
-          antialias: !isLowQuality,
+          antialias: !isLowQuality && !isMobile,
           powerPreference: 'high-performance',
           alpha: false,
         }}

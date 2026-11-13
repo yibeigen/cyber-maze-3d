@@ -2,6 +2,7 @@ import {
   Compass,
   Eye,
   Gamepad2,
+  Hand,
   Radar,
   RotateCw,
   SlidersHorizontal,
@@ -18,7 +19,7 @@ import { useT } from '../i18n/store'
 import { useGameStore } from '../state/useGameStore'
 
 const JOYSTICK_MAX_RADIUS = 46
-const JOYSTICK_DEADZONE = 12
+const JOYSTICK_DEADZONE = 8
 
 /**
  * 智能拐弯辅助与方向解析：
@@ -136,6 +137,7 @@ export const TouchController = memo(function TouchController() {
   })
 
   const joystickPointerIdRef = useRef<number | null>(null)
+  const originRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const activeDirRef = useRef<Dir | null>(null)
   const firstPersonTurnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const fixedPadRef = useRef<HTMLDivElement>(null)
@@ -206,16 +208,16 @@ export const TouchController = memo(function TouchController() {
     if (joystickPointerIdRef.current !== null) return
 
     const target = e.target as HTMLElement | null
-    if (
-      target &&
-      (target.closest('button') || target.closest('input') || target.closest('[data-interactive="true"]'))
-    ) {
+    if (target && (target.closest('button') || target.closest('input'))) {
       return
     }
 
     e.preventDefault()
-    e.currentTarget.setPointerCapture(e.pointerId)
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {}
     joystickPointerIdRef.current = e.pointerId
+    originRef.current = { x: e.clientX, y: e.clientY }
 
     setJoystick({
       active: true,
@@ -229,8 +231,8 @@ export const TouchController = memo(function TouchController() {
   const handleJoystickZonePointerMove = (e: React.PointerEvent) => {
     if (joystickPointerIdRef.current !== e.pointerId) return
 
-    const dx = e.clientX - joystick.originX
-    const dy = e.clientY - joystick.originY
+    const dx = e.clientX - originRef.current.x
+    const dy = e.clientY - originRef.current.y
     const dist = Math.hypot(dx, dy)
 
     if (dist < JOYSTICK_DEADZONE) {
@@ -254,6 +256,9 @@ export const TouchController = memo(function TouchController() {
 
   const handleJoystickZonePointerUp = (e: React.PointerEvent) => {
     if (joystickPointerIdRef.current !== e.pointerId) return
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    } catch {}
     joystickPointerIdRef.current = null
     setJoystick({
       active: false,
@@ -314,7 +319,6 @@ export const TouchController = memo(function TouchController() {
       {touchControlMode === 'joystick' ? (
         // --- 动态浮动摇杆全屏左半感应区 ---
         <div
-          data-interactive="true"
           onPointerDown={handleJoystickZonePointerDown}
           onPointerMove={handleJoystickZonePointerMove}
           onPointerUp={handleJoystickZonePointerUp}
@@ -373,7 +377,7 @@ export const TouchController = memo(function TouchController() {
             </div>
           )}
         </div>
-      ) : (
+      ) : touchControlMode === 'dpad' ? (
         // --- 经典固定十字键 ---
         <div className="pointer-events-none absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-4 z-30 select-none md:left-8">
           <div
@@ -381,7 +385,9 @@ export const TouchController = memo(function TouchController() {
             data-interactive="true"
             onPointerDown={(e) => {
               e.preventDefault()
-              e.currentTarget.setPointerCapture(e.pointerId)
+              try {
+                e.currentTarget.setPointerCapture(e.pointerId)
+              } catch {}
               handleFixedPointerMove(e)
             }}
             onPointerMove={(e) => {
@@ -425,28 +431,40 @@ export const TouchController = memo(function TouchController() {
             </div>
           </div>
         </div>
+      ) : (
+        // --- 纯手势划屏模式 ---
+        <div className="pointer-events-none absolute bottom-8 left-6 z-30 select-none">
+          <div className="flex items-center gap-2 rounded-full border border-cyber-accent/50 bg-surface/70 px-4 py-1.5 text-xs text-ink-dim shadow-lg shadow-cyber-accent/10 backdrop-blur-md">
+            <Hand className="h-4 w-4 text-cyber-accent animate-pulse" />
+            <span>{t('touch.swipeHint')}</span>
+          </div>
+        </div>
       )}
 
       {/* ================= 右侧人体工学功能按键群 ================= */}
       <div className="pointer-events-none absolute bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-30 flex select-none flex-col items-end gap-2 md:right-8">
         {/* 顶部辅助工具行 */}
         <div className="pointer-events-auto flex items-center gap-2">
-          {/* 摇杆/十字键切换按钮 */}
+          {/* 摇杆/十字键/划屏切换按钮 */}
           <button
             type="button"
             onClick={toggleTouchControlMode}
             className={`flex h-10 w-10 items-center justify-center rounded-xl border backdrop-blur-md active:scale-95 transition-all ${
               touchControlMode === 'joystick'
                 ? 'border-cyber-accent/80 bg-cyber-accent/15 text-cyber-accent'
-                : 'border-edge/60 bg-surface/75 text-ink-dim'
+                : touchControlMode === 'dpad'
+                  ? 'border-warn/70 bg-warn/15 text-warn'
+                  : 'border-ok/70 bg-ok/15 text-ok'
             }`}
             title={t('touch.modeToggleTitle')}
             aria-label={t('touch.modeToggleTitle')}
           >
             {touchControlMode === 'joystick' ? (
               <Gamepad2 className="h-4 w-4" />
-            ) : (
+            ) : touchControlMode === 'dpad' ? (
               <SlidersHorizontal className="h-4 w-4" />
+            ) : (
+              <Hand className="h-4 w-4" />
             )}
           </button>
 

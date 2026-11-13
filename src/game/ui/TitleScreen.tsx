@@ -53,6 +53,7 @@ export function TitleScreen() {
   const theme = useGameStore((s) => s.theme)
   const setTheme = useGameStore((s) => s.setTheme)
   const showToast = useGameStore((s) => s.showToast)
+  const isMobile = useGameStore((s) => s.isMobile)
   const showTouchControls = useGameStore((s) => s.showTouchControls)
   const toggleTouchControls = useGameStore((s) => s.toggleTouchControls)
   const reducedMotion = useGameStore((s) => s.reducedMotion)
@@ -298,9 +299,15 @@ export function TitleScreen() {
             >
               {t(quality === 'auto' ? 'title.qualityAuto' : quality === 'high' ? 'title.qualityHigh' : 'title.qualityLow')}
             </button>
-            <button onClick={toggleTouchControls} className={GHOST}>
-              <MonitorSmartphone className="h-4 w-4" />
-              <span>{t(showTouchControls ? 'title.touchOn' : 'title.touchOff')}</span>
+            <button onClick={toggleTouchControls} className={GHOST} title={t('touch.modeToggleTitle')}>
+              <MonitorSmartphone className={`h-4 w-4 ${isMobile && showTouchControls ? 'text-cyber-accent' : ''}`} />
+              <span>
+                {showTouchControls
+                  ? isMobile
+                    ? t('title.mobileDetected')
+                    : t('title.touchOn')
+                  : t('title.touchOff')}
+              </span>
             </button>
             <button
               onClick={() => setAuthorModalOpen(true)}

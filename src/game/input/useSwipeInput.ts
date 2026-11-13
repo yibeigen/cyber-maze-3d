@@ -36,8 +36,8 @@ export function useSwipeInput(): void {
         return
       }
 
-      // 如果开启了触控手柄且触控点落在左侧摇杆感应区域，由摇杆优先捕获
-      if (store.showTouchControls && e.clientX < window.innerWidth * 0.6) {
+      // 如果开启了手柄控件且当前不是划屏模式，交由虚拟摇杆/按键处理，避免手势冲突
+      if (store.showTouchControls && store.touchControlMode !== 'swipe') {
         return
       }
 
