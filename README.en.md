@@ -20,9 +20,13 @@
     <img src="https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react&logoColor=black" alt="React 18">
     <img src="https://img.shields.io/badge/Three.js-R3F-000000?style=flat-square&logo=threedotjs&logoColor=white" alt="Three.js">
     <img src="https://img.shields.io/badge/TypeScript-5.5-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
-    <!-- License -->
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-red.svg?style=flat-square" alt="License"></a>
+    <!-- Jam & License -->
+    <a href="https://itch.io/jam/game-off-2026"><img src="https://img.shields.io/badge/GitHub%20Game%20Off-2026%20Entry-blueviolet?style=flat-square&logo=itch.io&logoColor=white" alt="Game Off 2026 Entry"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-All%20Rights%20Reserved-red.svg?style=flat-square" alt="All Rights Reserved"></a>
   </p>
+
+  > 🏆 **Official Entry for GitHub Game Off 2026 (Theme: SHIFT)**  
+  > ⚠️ **Copyright Notice & Legal Disclaimer**: All rights reserved. The source code is made publicly viewable strictly for **GitHub Game Off 2026 evaluation, judging, and educational review**. **Any unauthorized commercial use, repackaging, redistribution, or publishing to app stores or mini-game platforms (including WeChat Mini-games, Douyin, TapTap, Steam, 4399, App Store, Google Play, etc.) is strictly prohibited. The author reserves all legal rights to pursue infringement.**
 
   <p><b>“Break past the static boundaries of classic mazes and dive into kinetic topology plus a 3D light show.”</b><br>
   No install, no sign-up — open your browser and set off. The game UI supports Chinese and English, with Chinese as the default.</p>
@@ -164,6 +168,8 @@ Run the full unit test suite with `npm run test`.
 
 ---
 
-## 📄 License
+## 📄 Competition Notice & License
 
-Released under the [MIT License](LICENSE). Learning, sharing, and derivative works are welcome. For commercial use or enterprise integration, please keep the original author's attribution.
+- This project is an original entry created by the author for the **GitHub Game Off 2026** game jam (Theme: SHIFT).
+- Per the official competition IP terms, all intellectual property rights belong 100% exclusively to the author **艺杯羹 (yibeigen)**.
+- The code is published exclusively for competition judging, academic study, and non-commercial personal gameplay. **Commercial use, repackaging for app stores/mini-games, or unauthorized re-distribution without formal written permission constitutes severe copyright infringement.** See [LICENSE](LICENSE) for full details.

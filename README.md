@@ -20,9 +20,13 @@
     <img src="https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react&logoColor=black" alt="React 18">
     <img src="https://img.shields.io/badge/Three.js-R3F-000000?style=flat-square&logo=threedotjs&logoColor=white" alt="Three.js">
     <img src="https://img.shields.io/badge/TypeScript-5.5-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
-    <!-- 开源协议 -->
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-red.svg?style=flat-square" alt="License"></a>
+    <!-- 赛事与版权 -->
+    <a href="https://itch.io/jam/game-off-2026"><img src="https://img.shields.io/badge/GitHub%20Game%20Off-2026%20Entry-blueviolet?style=flat-square&logo=itch.io&logoColor=white" alt="Game Off 2026 Entry"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-All%20Rights%20Reserved-red.svg?style=flat-square" alt="All Rights Reserved"></a>
   </p>
+
+  > 🏆 **GitHub Game Off 2026 年度游戏大赛参赛作品（主题：SHIFT）**  
+  > ⚠️ **版权保护与法律严正声明**：本作所有源代码、图论动力学算法与设计资产**保留所有权利（All Rights Reserved）**。代码公开仅用于 **GitHub Game Off 2026 赛事评审打分与学术交流**。**严禁任何个人或机构将本作全部或部分代码、美术、算法进行商业化、二次打包或私自上架至任何平台（包括但不限于微信小游戏、抖音小游戏、TapTap、Steam、4399、Google Play、App Store 等）。原作者保留一切民事与刑事追责权利。**
 
   <p><b>「突破传统迷宫的静止边界，体验动力学拓扑重组与三维光影盛宴。」</b><br>
   无需安装、无需注册，打开浏览器即可即刻启航畅玩。游戏界面支持中英文切换，首次打开按浏览器语言自动选择，之后按你的手动选择记忆。</p>
@@ -164,6 +168,8 @@ npm run dev
 
 ---
 
-## 📄 开源许可证
+## 📄 参赛声明与版权许可
 
-本项目基于 [MIT License](LICENSE) 协议完全开源，欢迎学习、交流与二次开发。商业使用或企业集成请保留原作者署名。
+- 本项目系作者参加 **GitHub Game Off 2026** 游戏创客大赛（Theme: SHIFT）之原创作品。
+- 依据比赛官方知识产权条款，本作全部著作权归作者 **艺杯羹 (yibeigen)** 100% 独立所有。
+- 代码仅供大赛评审、学术研究与非商业个人试玩。**未经原作者书面正式授权，任何商业化利用、游戏平台套壳上架、付费分发或未经授权的二次演绎均属严重侵权**。详见 [LICENSE](LICENSE) 完整专有协议。

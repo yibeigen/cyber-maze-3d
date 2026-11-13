@@ -44,3 +44,4 @@ describe('orientationHelper', () => {
     expect(p3.y - p1.y).toBe(-30) // 向上为 local Y 减小（符合标准屏幕坐标）
   })
 })
+

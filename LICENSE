@@ -1,21 +1,38 @@
-MIT License
+GitHub Game Off 2026 Game Jam Non-Commercial Evaluation License & Copyright Notice
 
-Copyright (c) 2026 艺杯羹 (yibeigen)
+Copyright (c) 2026 艺杯羹 (yibeigen). All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This game and its complete source code are created and published on GitHub solely
+for the purpose of participating in the official GitHub Game Off 2026 Game Jam
+(Theme: SHIFT) and for peer review, judging, educational learning, and evaluation.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+1. Permission to View and Evaluate:
+   You are granted permission to clone, compile, and run this software locally on
+   your personal device for the sole purpose of playing, evaluating, and reviewing
+   the game in connection with GitHub Game Off 2026 or for personal non-commercial study.
+
+2. Strict Prohibition on Commercial Use and Redistribution:
+   - Commercial use of this software, its algorithms, game mechanics, assets, or
+     derivatives is strictly prohibited without prior written authorization from the author.
+   - You may NOT repackage, re-license, sublicense, sell, rent, monetize, or distribute
+     this software, in source or binary form, on any app store, platform, or marketplace,
+     including but not limited to:
+       * WeChat Mini-games (微信小游戏)
+       * Douyin / ByteDance Mini-games (抖音小游戏)
+       * TapTap / 4399 / Bilibili Games
+       * Steam / Epic Games Store / GOG
+       * Apple App Store / Google Play Store
+       * Or any other digital game distribution channel.
+
+3. Intellectual Property Rights:
+   All rights, title, and interest in and to the game, including but not limited to
+   all source code, dynamic shifting maze algorithms, graph-theoretic invariant logic,
+   visual design, UI/UX, and branding, remain exclusively with the original author (艺杯羹 / yibeigen).
+
+4. Disclaimer of Warranty:
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
